@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>元邮胶囊</title>
+<style>
+* {margin:0;padding:0;box-sizing:border-box;font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;}
+body{margin:0;height:100vh;position:relative;display:flex;flex-direction:column;overflow:hidden;background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);}
+.bg{position:fixed;width:100%;height:100%;background:url(/static/bg.jpg) center/cover;opacity:0.7;filter:blur(3px) brightness(0.8);z-index:1;}
+.btn-group{position:absolute;top:20px;right:20px;z-index:10;display:flex;border-radius:50px;overflow:hidden;box-shadow:0 8px 32px rgba(0, 0, 0, 0.2);backdrop-filter: blur(10px);background: rgba(255, 255, 255, 0.15);border: 1px solid rgba(255, 255, 255, 0.25);}
+.btn{width:85px;height:85px;background:rgba(255,255,255,0.12);display:flex;flex-direction:column;justify-content:center;align-items:center;cursor:pointer;transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);position: relative;}
+.btn:last-child{border-left:1px solid rgba(255, 255, 255, 0.2);}
+.btn:hover{background:rgba(255,255,255,0.3);transform:translateY(-5px) scale(1.05);box-shadow:0 10px 25px rgba(255, 255, 255, 0.3);}
+.icon{font-size:32px;color:white;margin-bottom:5px;transition:all 0.4s;text-shadow: 0 2px 5px rgba(0,0,0,0.2);}
+.icon-text{font-size:14px;color:white;font-weight:600;letter-spacing:0.5px;transition:all 0.4s;}
+.btn:hover .icon{transform:scale(1.15) rotate(5deg);}
+.btn:hover .icon-text{font-weight:700;letter-spacing:1px;}
+
+/* 邮箱小红点 */
+.mail-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #ff4757;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  animation: pulse 2s infinite;
+  box-shadow: 0 2px 10px rgba(255, 71, 87, 0.4);
+  z-index: 11;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.title{text-align:center;margin:40px auto 0;z-index:10;position:relative;}
+.main-title{font-size:68px;color:white;padding:25px 60px;border: 2px solid rgba(255, 255, 255, 0.4);border-radius:25px;background: rgba(255, 255, 255, 0.15);display:inline-block;letter-spacing:6px;box-shadow:0 15px 35px rgba(0, 0, 0, 0.3);backdrop-filter: blur(10px);font-weight:700;text-shadow: 0 2px 10px rgba(0,0,0,0.4);position: relative;overflow: hidden;}
+.main-title::before{content: '';position: absolute;top: 0;left: -100%;width: 100%;height: 100%;background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);animation: shine 3s infinite;}
+@keyframes shine { 100% { left: 100%; } }
+.middle-box{flex:1;display:flex;z-index:10;padding:0 40px;gap:30px;margin:40px 0;align-items: center;justify-content: center;}
+.middle-btn{width:320px;height:320px;display:flex;justify-content:center;align-items:center;border-radius:25px;box-shadow:0 20px 50px rgba(0, 0, 0, 0.4);font-size:42px;font-weight:800;cursor:pointer;transition:all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);text-decoration:none;position: relative;overflow: hidden;border: none;}
+.middle-btn::before{content: '';position: absolute;top: 0;left: 0;right: 0;bottom: 0;background: rgba(255, 255, 255, 0.15);border-radius: 25px;}
+.middle-btn span{z-index: 2;position: relative;}
+.left-btn{background:linear-gradient(135deg, rgba(106, 17, 203, 0.9) 0%, rgba(37, 117, 252, 0.9) 100%);color:white;}
+.right-btn{background:linear-gradient(135deg, rgba(240, 147, 251, 0.9) 0%, rgba(245, 87, 108, 0.9) 100%);color:white;}
+.middle-btn:hover{transform:translateY(-12px) scale(1.03);box-shadow:0 30px 60px rgba(0, 0, 0, 0.5);}
+.middle-btn:hover::before{background: rgba(255, 255, 255, 0.2);}
+.footer-box{height:100px;z-index:10;display:flex;padding:0 40px;gap:25px;align-items:center;justify-content:center;margin-bottom:30px;}
+.footer-btn{width:240px;height:60px;background:rgba(255,255,255,0.15);border-radius:15px;display:flex;justify-content:center;align-items:center;font-size:18px;color:white;font-weight:600;cursor:pointer;transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);box-shadow:0 8px 20px rgba(0, 0, 0, 0.3);backdrop-filter: blur(10px);border: 1px solid rgba(255, 255, 255, 0.25);position: relative;overflow: hidden;}
+.footer-btn::before{content: '';position: absolute;top: 0;left: 0;right: 0;bottom: 0;background: rgba(255, 255, 255, 0.1);border-radius: 15px;}
+.footer-btn span{z-index: 2;position: relative;}
+.footer-btn:hover{background:rgba(255,255,255,0.3);transform:translateY(-8px) scale(1.05);color:#fff;box-shadow:0 15px 30px rgba(0, 0, 0, 0.4);}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:none;justify-content:center;align-items:center;z-index:999;backdrop-filter: blur(5px);}
+.modal-box{width:520px;background:linear-gradient(135deg, rgba(255,255,255,0.98), rgba(240, 245, 255, 0.98));padding:35px;border-radius:25px;box-shadow:0 25px 50px rgba(0,0,0,0.3);border: 1px solid rgba(255, 255, 255, 0.3);position: relative;overflow: hidden;max-height: 80vh;overflow-y: auto;}
+.modal-box::before{content: '';position: absolute;top: 0;left: 0;right: 0;height: 5px;background: linear-gradient(90deg, #6a11cb, #2575fc);}
+.close-btn{position:absolute;right:20px;top:20px;cursor:pointer;color:#999;font-size:28px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:all 0.3s;z-index: 2;}
+.close-btn:hover{color:#333;background:rgba(0,0,0,0.05);transform: rotate(90deg);}
+.modal-title{font-size:24px;color:#2c3e50;margin-bottom:25px;text-align:center;font-weight:700;padding-bottom:20px;border-bottom:2px solid #f0f5ff;position: relative;}
+.modal-title::after{content: '';position: absolute;bottom: -2px;left: 50%;transform: translateX(-50%);width: 60px;height: 3px;background: linear-gradient(90deg, #6a11cb, #2575fc);border-radius: 3px;}
+.modal-txt{font-size:16px;color:#555;line-height:1.7;}
+
+/* 邮箱通知样式 */
+.notification-list {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 15px;
+}
+
+.notification-item {
+  padding: 15px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.3s;
+}
+
+.notification-item:hover {
+  background: #f9f9f9;
+}
+
+.notification-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.notification-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.notification-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 3px;
+}
+
+.notification-time {
+  font-size: 12px;
+  color: #999;
+}
+
+.notification-content {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+  margin-top: 8px;
+  padding-left: 48px;
+}
+
+.no-notifications {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  font-size: 16px;
+}
+
+.clear-notifications {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background: #f8f9fa;
+  color: #666;
+  border: none;
+  border-radius: 8px;
+  margin-top: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.clear-notifications:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.form-item{margin:18px 0;}
+.form-item label{display:block;font-size:14px;color:#555;margin-bottom:8px;font-weight:600;}
+.form-item input{width:100%;height:48px;padding:0 18px;border:2px solid #e0e8f5;border-radius:12px;font-size:15px;transition:all 0.3s;background: rgba(255,255,255,0.9);}
+.form-item input:focus{outline:none;border-color:#6a11cb;box-shadow:0 0 0 4px rgba(106, 17, 203, 0.1);}
+.submit-btn{width:100%;height:50px;background:linear-gradient(90deg, #6a11cb, #2575fc);color:#fff;border:none;border-radius:12px;font-size:17px;font-weight:600;cursor:pointer;margin-top:15px;transition:all 0.4s;position: relative;overflow: hidden;}
+.submit-btn:hover{transform: translateY(-3px);box-shadow:0 10px 20px rgba(106, 17, 203, 0.3);}
+.submit-btn:active{transform: translateY(-1px);}
+.reg-txt{text-align:center;margin-top:20px;font-size:14px;color:#777;}
+.reg-btn{color:#6a11cb;cursor:pointer;margin-left:5px;font-weight:600;transition: all 0.3s;}
+.reg-btn:hover{text-decoration:underline;color:#2575fc;}
+.profile-header{text-align:center;margin-bottom:30px;}
+.profile-avatar{width:100px;height:100px;border-radius:50%;margin:0 auto 15px;display:flex;justify-content:center;align-items:center;font-size:48px;background:linear-gradient(135deg, #6a11cb, #2575fc);color:white;object-fit:cover;box-shadow: 0 10px 20px rgba(106, 17, 203, 0.2);border: 3px solid white;}
+.profile-info{margin:18px 0;font-size:16px;color:#333;display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f0f5ff;}
+.info-label{color:#666;font-weight:600;}
+.edit-btn{font-size:15px;background:linear-gradient(90deg, #6a11cb, #2575fc);-webkit-background-clip:text;background-clip:text;color:transparent;cursor:pointer;font-weight:700;padding: 6px 16px;border-radius: 8px;border: 2px solid #e0e8f5;transition: all 0.3s;}
+.edit-btn:hover{border-color: #6a11cb;background: linear-gradient(90deg, #6a11cb, #2575fc);color: white;}
+.gender-select, .college-select{width:100%;height:48px;padding:0 15px;border:2px solid #e0e8f5;border-radius:12px;font-size:15px;color:#333;background: rgba(255,255,255,0.9);transition: all 0.3s;}
+.gender-select:focus, .college-select:focus{outline:none;border-color:#6a11cb;box-shadow:0 0 0 4px rgba(106, 17, 203, 0.1);}
+.avatar-upload{margin-top:15px;}
+.upload-btn{font-size:15px;background:linear-gradient(90deg, #6a11cb, #2575fc);-webkit-background-clip:text;background-clip:text;color:transparent;cursor:pointer;font-weight:700;padding: 8px 20px;border-radius: 8px;border: 2px solid #e0e8f5;transition: all 0.3s;display: inline-block;}
+.upload-btn:hover{border-color: #6a11cb;background: linear-gradient(90deg, #6a11cb, #2575fc);color: white;}
+#avatarInput{display:none;}
+.login-status{position:absolute;top:20px;left:20px;z-index:10;padding:10px 20px;background:rgba(255,255,255,0.15);border-radius:50px;color:white;font-size:14px;font-weight:600;backdrop-filter: blur(10px);border: 1px solid rgba(255, 255, 255, 0.25);box-shadow:0 5px 15px rgba(0,0,0,0.2);display: none;}
+.login-status.show{display: block;}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<!-- 登录状态显示 -->
+<div class="login-status" id="loginStatus">
+  欢迎，<span id="userName">用户</span> |
+  <span style="color:#ffdd40;cursor:pointer;margin-left:5px;" onclick="logout()">退出</span>
+</div>
+
+<div class="btn-group">
+  <div class="btn" onclick="showMailModal()">
+    <div class="icon">✉️</div>
+    <div class="icon-text">邮箱</div>
+    <div class="mail-badge" id="mailBadge" style="display: none;">0</div>
+  </div>
+  <div class="btn" onclick="showLoginOrProfile()" id="loginBtn">
+    <div class="icon">👤</div>
+    <div class="icon-text" id="loginBtnText">登录</div>
+  </div>
+</div>
+
+<div class="title">
+  <h1 class="main-title">元邮胶囊</h1>
+</div>
+
+<div class="middle-box">
+  <a href="{{ url_for('campus') }}" class="middle-btn left-btn">
+    <span>Explore</span>
+  </a>
+  <div class="middle-btn right-btn" onclick="openMyBUPT()">
+    <span>My BUPT</span>
+  </div>
+</div>
+
+<div class="footer-box">
+  <div class="footer-btn" onclick="checkLoginThenShowProfile()">
+    <span>个人资料</span>
+  </div>
+  <div class="footer-btn" onclick="showAbout()">
+    <span>关于我们</span>
+  </div>
+</div>
+
+<!-- 邮箱消息弹窗 -->
+<div class="modal" id="m1">
+  <div class="modal-box">
+    <span class="close-btn" onclick="closeModal('m1')">×</span>
+    <h3 class="modal-title">我的消息</h3>
+    <div class="notification-list" id="notificationList">
+      <!-- 通知内容会动态加载到这里 -->
+    </div>
+    <button class="clear-notifications" onclick="clearAllNotifications()">清空所有通知</button>
+  </div>
+</div>
+
+<!-- 登录弹窗 -->
+<div class="modal" id="m2">
+  <div class="modal-box">
+    <span class="close-btn" onclick="closeModal('m2')">×</span>
+    <h3 class="modal-title">账号登录</h3>
+    <div class="form-item">
+      <label>用户名或学号</label>
+      <input type="text" placeholder="请输入用户名或学号" id="loginUsername">
+    </div>
+    <div class="form-item">
+      <label>密码</label>
+      <input type="password" placeholder="请输入密码" id="loginPassword">
+    </div>
+    <button class="submit-btn" onclick="saveLoginInfo()">登录</button>
+    <div class="reg-txt">未注册？<span class="reg-btn" onclick="showRegister()">立即注册</span></div>
+  </div>
+</div>
+
+<!-- 注册弹窗 -->
+<div class="modal" id="m3">
+  <div class="modal-box">
+    <span class="close-btn" onclick="closeModal('m3')">×</span>
+    <h3 class="modal-title">账号注册</h3>
+    <div class="form-item">
+      <label>用户名</label>
+      <input type="text" placeholder="请设置用户名（至少3位）" id="regUsername">
+    </div>
+    <div class="form-item">
+      <label>密码</label>
+      <input type="password" placeholder="请设置密码（至少6位）" id="regPassword">
+    </div>
+    <div class="form-item">
+      <label>学号</label>
+      <input type="text" placeholder="请输入学号" id="regStudentId">
+    </div>
+    <button class="submit-btn" onclick="saveRegInfo()">完成注册</button>
+  </div>
+</div>
+
+<!-- 个人资料查看弹窗 -->
+<div class="modal" id="m4">
+  <div class="modal-box">
+    <span class="close-btn" onclick="closeModal('m4')">×</span>
+    <h3 class="modal-title">个人资料</h3>
+    <div class="profile-header">
+      <div class="profile-avatar" id="profileAvatar">👨</div>
+    </div>
+    <div class="profile-info">
+      <span class="info-label">用户名</span>
+      <span id="showUsername">未登录</span>
+    </div>
+    <div class="profile-info">
+      <span class="info-label">昵称</span>
+      <span id="showNickname">未设置</span>
+    </div>
+    <div class="profile-info">
+      <span class="info-label">学号</span>
+      <span id="showStudentId">未设置</span>
+    </div>
+    <div class="profile-info">
+      <span class="info-label">性别</span>
+      <span id="showGender">未设置</span>
+    </div>
+    <div class="profile-info">
+      <span class="info-label">学院</span>
+      <span id="showCollege">未设置</span>
+    </div>
+    <div style="text-align:right;margin-top:25px;">
+      <span class="edit-btn" onclick="showEditProfile()">编辑资料</span>
+    </div>
+  </div>
+</div>
+
+<!-- 编辑资料弹窗 -->
+<div class="modal" id="m5">
+  <div class="modal-box">
+    <span class="close-btn" onclick="closeModal('m5')">×</span>
+    <h3 class="modal-title">编辑资料</h3>
+    <div class="profile-header">
+      <div class="profile-avatar" id="editAvatar">👨</div>
+      <div class="avatar-upload">
+        <span class="upload-btn" onclick="document.getElementById('avatarInput').click()">选择本地头像</span>
+        <input type="file" id="avatarInput" accept="image/*" onchange="previewAvatar(this)">
+      </div>
+    </div>
+    <div class="form-item">
+      <label>昵称</label>
+      <input type="text" placeholder="请输入昵称" id="editNickname">
+    </div>
+    <div class="form-item">
+      <label>性别</label>
+      <select class="gender-select" id="editGender">
+        <option value="未设置">请选择性别</option>
+        <option value="男">男</option>
+        <option value="女">女</option>
+      </select>
+    </div>
+    <div class="form-item">
+      <label>学院</label>
+      <select class="college-select" id="editCollege">
+        <option value="未设置">请选择学院</option>
+        <option value="数字媒体与艺术设计学院">数字媒体与艺术设计学院</option>
+        <option value="信息与通信工程学院">信息与通信工程学院</option>
+        <option value="电子工程学院">电子工程学院</option>
+        <option value="计算机学院">计算机学院</option>
+        <option value="网络空间安全学院">网络空间安全学院</option>
+        <option value="智能工程与自动化学院">智能工程与自动化学院</option>
+      </select>
+    </div>
+    <button class="submit-btn" onclick="saveProfile()">保存修改</button>
+  </div>
+</div>
+
+<!-- 关于我们弹窗 -->
+<div class="modal" id="m6">
+  <div class="modal-box">
+    <span class="close-btn" onclick="closeModal('m6')">×</span>
+    <h3 class="modal-title">关于我们</h3>
+    <div class="modal-txt" style="text-align: center;">
+      <p style="font-size: 20px; color: #6a11cb; margin-bottom: 15px;">🎓 元邮胶囊</p>
+      <p>北京邮电大学校园记忆数字空间</p>
+      <p>记录美好校园时光</p>
+      <p>珍藏每一份青春记忆</p>
+      <p>研发团队</p>
+      <p>2025级</p>
+      <p>计算机学院 董芯彤</p>
+      <p>电子工程学院 宗敬伦</p>
+      <p>电子工程学院 王佳毅</p>
+      <p>电子工程学院 刘嘉伦</p>
+      <p>集成电路学院 毕伦</p>
+      <p style="margin-top: 20px; color: #777; font-size: 14px;">© 2026 元邮胶囊 版权所有</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// API基础URL
+const API_BASE = '/api';
+let currentUser = null;
+let avatarFile = null;
+
+// 页面加载时检查登录状态和更新邮箱通知
+window.onload = async function() {
+  await checkLoginStatus();
+  updateMailBadge();
+  setupModalEvents();
+}
+
+// 检查登录状态
+async function checkLoginStatus() {
+  try {
+    const response = await fetch(`${API_BASE}/check-login`);
+    const data = await response.json();
+
+    if (data.logged_in && data.user) {
+      currentUser = data.user;
+      updateLoginStatus();
+    }
+  } catch (error) {
+    console.error('检查登录状态失败:', error);
+  }
+}
+
+// 通用关闭弹窗函数
+function closeModal(modalId) {
+  document.getElementById(modalId).style.display = 'none';
+}
+
+// 设置弹窗事件
+function setupModalEvents() {
+  const modals = document.querySelectorAll('.modal');
+  modals.forEach(modal => {
+    modal.onclick = function(e) {
+      if (e.target === this) {
+        this.style.display = 'none';
+      }
+    };
+  });
+
+  // ESC键关闭弹窗
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      const modals = document.querySelectorAll('.modal');
+      modals.forEach(modal => {
+        if (modal.style.display === 'flex') {
+          modal.style.display = 'none';
+        }
+      });
+    }
+  });
+}
+
+// 显示邮箱弹窗
+function showMailModal() {
+  loadNotifications();
+  document.getElementById('m1').style.display = 'flex';
+}
+
+// 加载通知
+function loadNotifications() {
+  // 暂时使用本地存储的通知
+  const notifications = JSON.parse(localStorage.getItem('mailNotifications')) || [];
+  const notificationList = document.getElementById('notificationList');
+
+  if (notifications.length === 0) {
+    notificationList.innerHTML = '<div class="no-notifications">📭 暂无新消息</div>';
+    return;
+  }
+
+  const notificationsHTML = notifications.map(notification => {
+    let icon = '💬';
+    let title = '';
+
+    if (notification.type === 'like') {
+      icon = '❤️';
+      title = `${notification.fromUser} 点赞了你的回忆`;
+    } else if (notification.type === 'reply') {
+      icon = '💬';
+      title = `${notification.fromUser} 回复了你的回忆`;
+    }
+
+    return `
+    <div class="notification-item">
+      <div class="notification-header">
+        <div class="notification-icon">${icon}</div>
+        <div>
+          <div class="notification-title">${title}</div>
+          <div class="notification-time">${notification.time}</div>
+        </div>
+      </div>
+      <div class="notification-content">
+        ${notification.content}
+        <div style="font-size:12px;color:#999;margin-top:5px;">
+          地点：${notification.scene}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  notificationList.innerHTML = notificationsHTML;
+}
+
+// 清空所有通知
+function clearAllNotifications() {
+  localStorage.removeItem('mailNotifications');
+  loadNotifications();
+  updateMailBadge();
+  showSuccess('已清空所有通知');
+}
+
+// 更新邮箱小红点
+function updateMailBadge() {
+  const notifications = JSON.parse(localStorage.getItem('mailNotifications')) || [];
+  const mailBadge = document.getElementById('mailBadge');
+
+  if (notifications.length > 0) {
+    mailBadge.style.display = 'flex';
+    mailBadge.textContent = notifications.length > 99 ? '99+' : notifications.length;
+  } else {
+    mailBadge.style.display = 'none';
+  }
+}
+
+// 更新登录状态显示
+function updateLoginStatus() {
+  const loginStatus = document.getElementById('loginStatus');
+  const loginBtnText = document.getElementById('loginBtnText');
+  const userName = document.getElementById('userName');
+
+  if (currentUser) {
+    loginStatus.classList.add('show');
+    userName.textContent = currentUser.nickname || currentUser.username;
+    loginBtnText.textContent = '已登录';
+  } else {
+    loginStatus.classList.remove('show');
+    loginBtnText.textContent = '登录';
+  }
+}
+
+// 显示登录或资料
+function showLoginOrProfile() {
+  if (currentUser) {
+    checkLoginThenShowProfile();
+  } else {
+    document.getElementById('m2').style.display = 'flex';
+  }
+}
+
+// 显示注册弹窗
+function showRegister() {
+  closeModal('m2');
+  setTimeout(() => {
+    document.getElementById('m3').style.display = 'flex';
+  }, 200);
+}
+
+// 检查登录后显示个人资料
+async function checkLoginThenShowProfile() {
+  try {
+    const response = await fetch(`${API_BASE}/check-login`);
+    const data = await response.json();
+
+    if (data.logged_in && data.user) {
+      currentUser = data.user;
+      fillProfile();
+      document.getElementById('m4').style.display = 'flex';
+    } else {
+      alert('请先登录，才能查看个人资料～');
+      document.getElementById('m2').style.display = 'flex';
+    }
+  } catch (error) {
+    console.error('检查登录状态失败:', error);
+    alert('请先登录，才能查看个人资料～');
+    document.getElementById('m2').style.display = 'flex';
+  }
+}
+
+// 打开My BUPT页面
+function openMyBUPT() {
+  if (!currentUser) {
+    alert('请先登录，才能访问My BUPT～');
+    document.getElementById('m2').style.display = 'flex';
+    return;
+  }
+  // 跳转到My BUPT页面（需要创建my-bupt.html）
+  window.location.href = '/my-bupt';
+}
+
+// 显示编辑资料弹窗
+function showEditProfile() {
+  closeModal('m4');
+  setTimeout(() => {
+    document.getElementById('m5').style.display = 'flex';
+  }, 200);
+}
+
+// 显示关于我们
+function showAbout() {
+  document.getElementById('m6').style.display = 'flex';
+}
+
+// 登录验证 - 连接到后端
+async function saveLoginInfo() {
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+
+  if (!username || !password) {
+    showError('用户名和密码不能为空！');
+    return;
+  }
+
+  try {
+    // 显示加载状态
+    const submitBtn = document.querySelector('#m2 .submit-btn');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = '登录中...';
+    submitBtn.disabled = true;
+
+    const response = await fetch(`${API_BASE}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password
+      })
+    });
+
+    const data = await response.json();
+
+    // 恢复按钮状态
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+
+    if (data.success) {
+      currentUser = data.user;
+      updateLoginStatus();
+      updateMailBadge();
+
+      // 清空表单
+      document.getElementById('loginUsername').value = '';
+      document.getElementById('loginPassword').value = '';
+
+      closeModal('m2');
+      showSuccess('登录成功！');
+    } else {
+      showError(data.message || '登录失败！');
+    }
+  } catch (error) {
+    console.error('登录错误:', error);
+    showError('网络错误，请稍后重试');
+    const submitBtn = document.querySelector('#m2 .submit-btn');
+    submitBtn.textContent = '登录';
+    submitBtn.disabled = false;
+  }
+}
+
+// 注册功能 - 连接到后端
+async function saveRegInfo() {
+  const username = document.getElementById('regUsername').value.trim();
+  const password = document.getElementById('regPassword').value.trim();
+  const studentId = document.getElementById('regStudentId').value.trim();
+
+  if (!username || !password || !studentId) {
+    showError('所有字段都不能为空！');
+    return;
+  }
+
+  if (username.length < 3) {
+    showError('用户名至少需要3个字符！');
+    return;
+  }
+
+  if (password.length < 6) {
+    showError('密码至少需要6个字符！');
+    return;
+  }
+
+  try {
+    // 显示加载状态
+    const submitBtn = document.querySelector('#m3 .submit-btn');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = '注册中...';
+    submitBtn.disabled = true;
+
+    const response = await fetch(`${API_BASE}/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password,
+        student_id: studentId
+      })
+    });
+
+    const data = await response.json();
+
+    // 恢复按钮状态
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+
+    if (data.success) {
+      currentUser = data.user;
+
+      // 清空表单
+      document.getElementById('regUsername').value = '';
+      document.getElementById('regPassword').value = '';
+      document.getElementById('regStudentId').value = '';
+
+      closeModal('m3');
+      document.getElementById('m2').style.display = 'flex';
+      showSuccess('注册成功！已自动登录～');
+    } else {
+      showError(data.message || '注册失败！');
+    }
+  } catch (error) {
+    console.error('注册错误:', error);
+    showError('网络错误，请稍后重试');
+    const submitBtn = document.querySelector('#m3 .submit-btn');
+    submitBtn.textContent = '完成注册';
+    submitBtn.disabled = false;
+  }
+}
+
+// 头像预览
+function previewAvatar(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  // 检查文件类型
+  if (!file.type.startsWith('image/')) {
+    showError('请选择图片文件！');
+    return;
+  }
+
+  // 检查文件大小（限制为2MB）
+  if (file.size > 2 * 1024 * 1024) {
+    showError('图片大小不能超过2MB！');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const avatar = document.getElementById('editAvatar');
+    avatar.innerHTML = '';
+    avatar.style.fontSize = '0';
+    avatar.style.background = '#fff';
+    const img = document.createElement('img');
+    img.src = e.target.result;
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.borderRadius = '50%';
+    img.style.objectFit = 'cover';
+    avatar.appendChild(img);
+
+    // 保存文件对象，稍后上传
+    avatarFile = file;
+  }
+  reader.readAsDataURL(file);
+}
+
+// 填充个人资料
+function fillProfile() {
+  if (!currentUser) return;
+
+  document.getElementById('showUsername').innerText = currentUser.username;
+  document.getElementById('showNickname').innerText = currentUser.nickname || currentUser.username;
+  document.getElementById('showStudentId').innerText = currentUser.student_id;
+  document.getElementById('showGender').innerText = currentUser.gender;
+  document.getElementById('showCollege').innerText = currentUser.college;
+
+  document.getElementById('editNickname').value = currentUser.nickname || currentUser.username;
+  document.getElementById('editGender').value = currentUser.gender;
+  document.getElementById('editCollege').value = currentUser.college;
+
+  // 头像回显
+  updateAvatarDisplay();
+}
+
+// 更新头像显示
+function updateAvatarDisplay() {
+  const editAvatar = document.getElementById('editAvatar');
+  const profileAvatar = document.getElementById('profileAvatar');
+
+  // 清空并设置默认
+  [editAvatar, profileAvatar].forEach(avatar => {
+    avatar.innerHTML = '';
+    avatar.style.fontSize = '48px';
+    avatar.style.background = 'linear-gradient(135deg, #6a11cb, #2575fc)';
+    avatar.style.color = 'white';
+    avatar.style.display = 'flex';
+    avatar.style.justifyContent = 'center';
+    avatar.style.alignItems = 'center';
+    avatar.textContent = '👨';
+  });
+
+  if (currentUser && currentUser.avatar) {
+    [editAvatar, profileAvatar].forEach(avatar => {
+      avatar.innerHTML = '';
+      avatar.style.fontSize = '0';
+      avatar.style.background = '#fff';
+      const img = document.createElement('img');
+      img.src = currentUser.avatar;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.borderRadius = '50%';
+      img.style.objectFit = 'cover';
+      avatar.appendChild(img);
+    });
+  }
+}
+
+// 保存个人资料 - 连接到后端
+async function saveProfile() {
+  if (!currentUser) {
+    showError('请先登录！');
+    return;
+  }
+
+  const nickname = document.getElementById('editNickname').value.trim();
+  const gender = document.getElementById('editGender').value;
+  const college = document.getElementById('editCollege').value;
+
+  if (!nickname) {
+    showError('昵称不能为空！');
+    return;
+  }
+
+  try {
+    // 显示加载状态
+    const submitBtn = document.querySelector('#m5 .submit-btn');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = '保存中...';
+    submitBtn.disabled = true;
+
+    const formData = new FormData();
+    formData.append('nickname', nickname);
+    formData.append('gender', gender);
+    formData.append('college', college);
+
+    if (avatarFile) {
+      formData.append('avatar', avatarFile);
+    }
+
+    const response = await fetch(`${API_BASE}/update-profile`, {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+
+    // 恢复按钮状态
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+
+    if (data.success) {
+      currentUser = data.user;
+
+      // 更新显示
+      document.getElementById('showNickname').innerText = nickname;
+      document.getElementById('showGender').innerText = gender;
+      document.getElementById('showCollege').innerText = college;
+
+      // 更新头像显示
+      if (data.user.avatar) {
+        updateAvatarDisplay();
+      }
+
+      closeModal('m5');
+      document.getElementById('m4').style.display = 'flex';
+      updateLoginStatus();
+      showSuccess('资料保存成功！');
+
+      // 重置文件
+      avatarFile = null;
+    } else {
+      showError(data.message || '保存失败');
+    }
+  } catch (error) {
+    console.error('保存资料错误:', error);
+    showError('保存失败，请重试');
+    const submitBtn = document.querySelector('#m5 .submit-btn');
+    submitBtn.textContent = '保存修改';
+    submitBtn.disabled = false;
+  }
+}
+
+// 退出登录
+async function logout() {
+  if (!confirm('确定要退出登录吗？')) {
+    return;
+  }
+
+  try {
+    await fetch(`${API_BASE}/logout`, {
+      method: 'POST'
+    });
+
+    currentUser = null;
+    updateLoginStatus();
+    updateMailBadge();
+    showSuccess('已退出登录');
+  } catch (error) {
+    console.error('登出错误:', error);
+    showError('退出登录失败');
+  }
+}
+
+// 显示成功消息
+function showSuccess(message) {
+  showAlert(message, 'success');
+}
+
+// 显示错误消息
+function showError(message) {
+  showAlert(message, 'error');
+}
+
+// 显示消息
+function showAlert(message, type) {
+  const colors = {
+    success: 'linear-gradient(90deg, #4CAF50, #45a049)',
+    error: 'linear-gradient(90deg, #f44336, #d32f2f)'
+  };
+
+  const alertDiv = document.createElement('div');
+  alertDiv.textContent = message;
+  alertDiv.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: ${colors[type] || colors.success};
+    color: white;
+    padding: 12px 24px;
+    border-radius: 10px;
+    z-index: 1000;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    font-weight: 600;
+    animation: slideIn 0.3s ease;
+  `;
+  document.body.appendChild(alertDiv);
+
+  setTimeout(() => {
+    alertDiv.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => alertDiv.remove(), 300);
+  }, 2000);
+
+  // 添加动画样式
+  if (!document.getElementById('alertAnimations')) {
+    const style = document.createElement('style');
+    style.id = 'alertAnimations';
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}
+</script>
+</body>
+</html>

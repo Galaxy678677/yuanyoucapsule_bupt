@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>元邮胶囊 - 校园记忆</title>
+<style>
+* {margin:0;padding:0;box-sizing:border-box;font-family:微软雅黑,PingFang SC,sans-serif;}
+body{min-height:100vh;position:relative;padding-bottom:50px;background:rgba(245,248,252,0.9);}
+.bg{position:fixed;width:100%;height:100%;background:url(/static/bg.jpg) center/cover;opacity:0.6;filter:blur(2px);z-index:-1;}
+.header{position:relative;padding:20px 30px;text-align:center;z-index:10;}
+.back-btn{position:absolute;left:30px;top:20px;background:rgba(255,255,255,0.95);padding:8px 16px;border-radius:8px;cursor:pointer;transition:all 0.3s;color:#1f56b3;text-decoration:none;display:inline-block;}
+.back-btn:hover{background:#fff;box-shadow:0 2px 8px rgba(31,86,179,0.2);}
+.page-title{font-size:36px;color:#1f56b3;margin:0;letter-spacing:2px;}
+.building-container{width:90%;max-width:1200px;margin:20px auto;display:flex;flex-wrap:wrap;gap:20px;justify-content:center;z-index:10;position:relative;}
+.building-card{width:280px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.08);cursor:pointer;transition:all 0.4s;}
+.building-card:hover{transform:translateY(-6px);box-shadow:0 8px 25px rgba(31,86,179,0.15);}
+.building-img{width:100%;height:180px;object-fit:cover;display:block;}
+.building-name{padding:12px;text-align:center;font-size:18px;color:#1f56b3;font-weight:500;}
+.memory-count{position:absolute;top:10px;right:10px;background:rgba(31,86,179,0.9);color:white;font-size:12px;padding:2px 6px;border-radius:10px;}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:none;justify-content:center;align-items:center;z-index:999;}
+.modal-box{width:500px;max-height:80vh;background:#fff;padding:30px;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.15);overflow-y:auto;}
+.close-btn{float:right;cursor:pointer;color:#999;font-size:20px;transition:all 0.2s;}
+.close-btn:hover{color:#333;}
+.modal-title{font-size:22px;color:#1f56b3;margin-bottom:20px;text-align:center;font-weight:600;padding-bottom:15px;border-bottom:1px solid #f0f5ff;}
+.user-bar{display:flex;align-items:center;gap:12px;margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid #f0f5ff;}
+.user-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #e0e8f5;}
+.user-nickname{font-size:16px;font-weight:600;color:#1f56b3;}
+.memory-input{width:100%;min-height:100px;padding:12px;border:1px solid #e0e8f5;border-radius:8px;margin:10px 0;resize:vertical;font-size:16px;color:#555;line-height:1.8;}
+.memory-tip{font-size:14px;color:#999;margin:5px 0;text-align:left;}
+.btns-group{display:flex;gap:10px;margin-top:15px;}
+.save-btn,.view-btn{flex:1;padding:10px;border:none;border-radius:8px;font-size:16px;cursor:pointer;transition:all 0.3s;}
+.save-btn{background:#1f56b3;color:#fff;}
+.save-btn:hover{background:#165dff;}
+.view-btn{background:#e0e8f5;color:#1f56b3;}
+.view-btn:hover{background:#d1dcf0;}
+.memory-list{max-height:300px;overflow-y:auto;padding:10px;border:1px solid #f0f5ff;border-radius:8px;margin:15px 0;}
+.memory-item{padding:10px 8px;border-bottom:1px dashed #f0f5ff;margin-bottom:8px;font-size:15px;color:#555;display:flex;align-items:flex-start;gap:10px;}
+.memory-item:last-child{border-bottom:none;margin-bottom:0;}
+.memory-default{color:#999;font-style:italic;text-align:center;padding:20px;}
+.item-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;}
+.item-info{flex:1;}
+.item-name{font-size:14px;font-weight:600;color:#1f56b3;margin-bottom:3px;}
+.item-time{font-size:12px;color:#999;margin-bottom:4px;}
+.item-content{line-height:1.6;word-break:break-word;}
+.loading{text-align:center;padding:20px;color:#999;}
+.error{text-align:center;padding:20px;color:#f56c6c;}
+.delete-btn{font-size:12px;color:#f56c6c;cursor:pointer;margin-left:10px;}
+.delete-btn:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="header">
+<a href="/" class="back-btn">← 返回首页</a>
+<h1 class="page-title">校园建筑·共享回忆墙</h1>
+</div>
+<div class="building-container" id="buildingContainer">
+<!-- 建筑卡片会通过JS动态加载 -->
+</div>
+
+<div class="modal" id="memoryModal">
+<div class="modal-box">
+<span class="close-btn" onclick="closeMemoryModal()">×</span>
+<h3 class="modal-title" id="memTitle">我的回忆</h3>
+<div class="user-bar">
+<img id="modalAvatar" class="user-avatar" alt="用户头像">
+<span id="modalNickname" class="user-nickname">游客</span>
+</div>
+<p class="memory-tip" id="memoryTip">默认回忆可改写，提交后带头像昵称全员可见～</p>
+<textarea class="memory-input" id="memoryContent" placeholder="写下你的校园回忆吧..."></textarea>
+<div class="btns-group">
+<button class="save-btn" onclick="submitMemory()" id="submitBtn">提交共享回忆</button>
+<button class="view-btn" onclick="toggleMemories()" id="toggleBtn">查看所有共享</button>
+</div>
+<div class="memory-list" id="allMemories"></div>
+</div>
+</div>
+
+<script>
+// 全局变量
+let currentUser = null;
+let currentBuilding = '';
+let isViewingMemories = false;
+
+// 页面加载时执行
+window.onload = async function() {
+    await checkLoginStatus();
+    await loadBuildings();
+    setupModalClose();
+};
+
+// 检查登录状态
+async function checkLoginStatus() {
+    try {
+        const response = await fetch('/api/check-login');
+        const data = await response.json();
+
+        if (data.logged_in && data.user) {
+            currentUser = data.user;
+            // 更新用户信息显示
+            document.getElementById('modalNickname').textContent = currentUser.nickname || currentUser.username;
+            if (currentUser.avatar) {
+                document.getElementById('modalAvatar').src = currentUser.avatar;
+            }
+        }
+    } catch (error) {
+        console.error('检查登录状态失败:', error);
+    }
+}
+
+// 加载建筑列表
+async function loadBuildings() {
+    try {
+        const response = await fetch('/api/campus/buildings');
+        const data = await response.json();
+
+        if (data.success) {
+            renderBuildings(data.buildings);
+        } else {
+            // 如果API失败，使用默认建筑
+            renderDefaultBuildings();
+        }
+    } catch (error) {
+        console.error('加载建筑列表失败:', error);
+        renderDefaultBuildings();
+    }
+}
+
+// 渲染建筑卡片
+function renderBuildings(buildings) {
+    const container = document.getElementById('buildingContainer');
+    container.innerHTML = '';
+
+    const defaultImages = {
+        '体育场': '/static/体育场.jpg',
+        '教学实验综合楼': '/static/教学实验综合楼.jpg',
+        '图书馆': '/static/图书馆.jpg',
+        '宿舍楼': '/static/宿舍楼.jpg',
+        '礼堂': '/static/礼堂.jpg',
+        '学生餐厅': '/static/学生餐厅.jpg',
+        '校园湖': '/static/校园湖.jpg',
+        '马克思主义学院': '/static/马克思主义学院.jpg',
+        '工程实验楼': '/static/工程实验楼.jpg',
+        '理学院': '/static/理学院.jpg',
+        '智能工程与自动化学院': '/static/智能工程与自动化学院.jpg',
+        '数字媒体与艺术设计学院': '/static/数字媒体与艺术设计学院.jpg',
+        '网络空间安全学院': '/static/网络空间安全学院.jpg',
+        '学生活动中心': '/static/学生活动中心.jpg',
+        '教职工食堂': '/static/教职工食堂.jpg',
+        '天猫超市': '/static/天猫超市.jpg'
+    };
+
+    buildings.forEach(building => {
+        const card = document.createElement('div');
+        card.className = 'building-card';
+        card.onclick = () => showMemoryModal(building.name);
+
+        const img = document.createElement('img');
+        img.className = 'building-img';
+        img.src = defaultImages[building.name] || '/static/default-building.jpg';
+        img.alt = building.name;
+        img.onerror = function() {
+            this.src = '/static/default-building.jpg';
+        };
+
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'building-name';
+        nameDiv.textContent = building.name;
+
+        // 显示记忆数量
+        if (building.count > 0) {
+            const countSpan = document.createElement('span');
+            countSpan.className = 'memory-count';
+            countSpan.textContent = building.count;
+            card.appendChild(countSpan);
+        }
+
+        card.appendChild(img);
+        card.appendChild(nameDiv);
+        container.appendChild(card);
+    });
+}
+
+// 渲染默认建筑（API失败时使用）
+function renderDefaultBuildings() {
+    const defaultBuildings = [
+        '体育场', '教学实验综合楼', '图书馆', '宿舍楼', '礼堂',
+        '学生餐厅', '校园湖', '马克思主义学院', '工程实验楼',
+        '理学院', '智能工程与自动化学院', '数字媒体与艺术设计学院',
+        '网络空间安全学院', '学生活动中心', '教职工食堂', '天猫超市'
+    ];
+
+    renderBuildings(defaultBuildings.map(name => ({ name, count: 0 })));
+}
+
+// 显示记忆模态框
+async function showMemoryModal(building, defaultText = '') {
+    currentBuilding = building;
+
+    // 更新标题
+    document.getElementById('memTitle').textContent = `${building}·我的回忆`;
+
+    // 更新提示
+    if (!currentUser) {
+        document.getElementById('memoryTip').textContent = '请先登录才能分享回忆';
+        document.getElementById('submitBtn').disabled = true;
+    } else {
+        document.getElementById('memoryTip').textContent = '提交后带头像昵称全员可见～';
+        document.getElementById('submitBtn').disabled = false;
+    }
+
+    // 设置默认文本
+    document.getElementById('memoryContent').value = defaultText;
+
+    // 重置状态
+    isViewingMemories = false;
+    document.getElementById('toggleBtn').textContent = '查看所有共享';
+    document.getElementById('allMemories').innerHTML = '';
+    document.getElementById('allMemories').style.display = 'none';
+
+    // 显示模态框
+    document.getElementById('memoryModal').style.display = 'flex';
+}
+
+// 关闭模态框
+function closeMemoryModal() {
+    document.getElementById('memoryModal').style.display = 'none';
+    currentBuilding = '';
+    document.getElementById('memoryContent').value = '';
+}
+
+// 设置模态框外部点击关闭
+function setupModalClose() {
+    const modal = document.getElementById('memoryModal');
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeMemoryModal();
+        }
+    });
+}
+
+// 提交记忆
+async function submitMemory() {
+    if (!currentUser) {
+        alert('请先登录');
+        showLoginModal();
+        return;
+    }
+
+    const content = document.getElementById('memoryContent').value.trim();
+    if (!content) {
+        alert('请输入回忆内容');
+        return;
+    }
+
+    if (!currentBuilding) {
+        alert('请选择建筑');
+        return;
+    }
+
+    try {
+        // 显示加载状态
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = '提交中...';
+        submitBtn.disabled = true;
+
+        const response = await fetch('/api/campus/memories', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                building: currentBuilding,
+                content: content
+            })
+        });
+
+        const data = await response.json();
+
+        // 恢复按钮状态
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+
+        if (data.success) {
+            alert('提交成功！');
+            document.getElementById('memoryContent').value = '';
+
+            // 刷新记忆列表
+            if (isViewingMemories) {
+                await loadMemories();
+            }
+
+            // 刷新建筑计数
+            await loadBuildings();
+        } else {
+            alert(data.message || '提交失败');
+        }
+    } catch (error) {
+        console.error('提交记忆失败:', error);
+        alert('提交失败，请检查网络');
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.textContent = '提交共享回忆';
+        submitBtn.disabled = false;
+    }
+}
+
+// 切换查看/隐藏记忆列表
+async function toggleMemories() {
+    isViewingMemories = !isViewingMemories;
+    const memoriesDiv = document.getElementById('allMemories');
+    const toggleBtn = document.getElementById('toggleBtn');
+
+    if (isViewingMemories) {
+        toggleBtn.textContent = '隐藏共享回忆';
+        memoriesDiv.style.display = 'block';
+        await loadMemories();
+    } else {
+        toggleBtn.textContent = '查看所有共享';
+        memoriesDiv.style.display = 'none';
+    }
+}
+
+// 加载记忆列表
+async function loadMemories() {
+    if (!currentBuilding) return;
+
+    const memoriesDiv = document.getElementById('allMemories');
+    memoriesDiv.innerHTML = '<div class="loading">加载中...</div>';
+
+    try {
+        const response = await fetch(`/api/campus/memories/${encodeURIComponent(currentBuilding)}`);
+        const data = await response.json();
+
+        if (data.success) {
+            if (data.memories.length === 0) {
+                memoriesDiv.innerHTML = '<div class="memory-default">暂无回忆，快来分享第一个～</div>';
+            } else {
+                memoriesDiv.innerHTML = data.memories.map(memory => `
+                    <div class="memory-item">
+                        <img src="${memory.avatar || '/static/default-avatar.jpg'}"
+                             class="item-avatar"
+                             alt="${memory.name}头像"
+                             onerror="this.src='/static/default-avatar.jpg'">
+                        <div class="item-info">
+                            <span class="item-name">${memory.name}</span>
+                            <span class="item-time">[${memory.time}]</span>
+                            ${currentUser && currentUser.id === memory.user_id ?
+                                `<span class="delete-btn" onclick="deleteMemory(${memory.id})">删除</span>` : ''}
+                            <div class="item-content">${memory.content}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        } else {
+            memoriesDiv.innerHTML = `<div class="error">${data.message || '加载失败'}</div>`;
+        }
+    } catch (error) {
+        console.error('加载记忆失败:', error);
+        memoriesDiv.innerHTML = '<div class="error">加载失败，请检查网络</div>';
+    }
+}
+
+// 删除记忆
+async function deleteMemory(memoryId) {
+    if (!confirm('确定要删除这条回忆吗？')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/campus/memories/${memoryId}`, {
+            method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert('删除成功');
+            // 刷新记忆列表
+            await loadMemories();
+            // 刷新建筑计数
+            await loadBuildings();
+        } else {
+            alert(data.message || '删除失败');
+        }
+    } catch (error) {
+        console.error('删除记忆失败:', error);
+        alert('删除失败');
+    }
+}
+
+// 显示登录模态框（跳转回首页登录）
+function showLoginModal() {
+    alert('请先登录');
+    window.location.href = '/';
+}
+</script>
+</body>
+</html>

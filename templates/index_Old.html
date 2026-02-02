@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>元邮胶囊</title>
+<style>
+* {margin:0;padding:0;box-sizing:border-box;font-family:微软雅黑,PingFang SC,sans-serif;}
+body{margin:0;height:100vh;position:relative;display:flex;flex-direction:column;overflow:hidden;}
+.bg{position:fixed;width:100%;height:100%;background:url(/static/bg.jpg) center/cover;opacity:0.65;filter:blur(2px);z-index:1;}
+.btn-group{position:absolute;top:15px;right:15px;z-index:10;display:flex;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,40,120,0.15);}
+.btn{width:82px;height:82px;background:rgba(255,255,255,0.98);display:flex;flex-direction:column;justify-content:center;align-items:center;cursor:pointer;transition:all 0.3s ease;}
+.btn:last-child{border-left:1px solid #f5f9ff;}
+.btn:hover{background:#fff;transform:translateY(-3px);box-shadow:0 0 12px rgba(22,119,255,0.2);}
+.icon{font-size:34px;color:#2366d1;margin-bottom:4px;transition:all 0.3s;}
+.icon-text{font-size:15px;color:#2366d1;font-weight:600;letter-spacing:1px;transition:all 0.3s;}
+.btn:hover .icon{color:#165dff;transform:scale(1.08);}
+.btn:hover .icon-text{color:#165dff;font-weight:700;}
+.title{text-align:center;margin:30px auto 0;z-index:10;position:relative;}
+.main-title{font-size:62px;color:#1f56b3;padding:20px 52px;border:3px solid #4a90e2;border-radius:16px;background:rgba(255,255,255,0.95);display:inline-block;letter-spacing:5px;box-shadow:0 6px 20px rgba(74,144,226,0.2);}
+.middle-box{flex:1;display:flex;z-index:10;padding:0 20px;gap:12px;margin:20px 0;}
+.middle-btn{width:50%;display:flex;justify-content:center;align-items:center;border-radius:20px;box-shadow:0 8px 25px rgba(0,40,120,0.08);font-size:36px;font-weight:700;cursor:pointer;transition:all 0.4s ease;text-decoration:none;}
+.left-btn{background:linear-gradient(135deg,rgba(230,240,255,0.95),rgba(209,224,255,0.95));color:#1f56b3;}
+.right-btn{background:linear-gradient(135deg,rgba(209,224,255,0.95),rgba(158,183,255,0.95));color:#144294;}
+.middle-btn:hover{transform:translateY(-5px);box-shadow:0 12px 30px rgba(74,144,226,0.2);}
+.footer-box{height:80px;z-index:10;display:flex;padding:0 30px;gap:12px;align-items:center;justify-content:center;margin-bottom:15px;}
+.footer-btn{width:45%;height:50px;background:rgba(255,255,255,0.9);border-radius:12px;display:flex;justify-content:center;align-items:center;font-size:18px;color:#2366d1;font-weight:500;cursor:pointer;transition:all 0.3s ease;box-shadow:0 2px 10px rgba(0,40,120,0.05);}
+.footer-btn:hover{background:#fff;transform:translateY(-2px);color:#165dff;box-shadow:0 4px 15px rgba(22,119,255,0.1);}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:none;justify-content:center;align-items:center;z-index:99;}
+.modal-box{width:380px;background:#fff;padding:30px;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.15);}
+.close-btn{float:right;cursor:pointer;color:#999;font-size:20px;transition:all 0.2s;}
+.close-btn:hover{color:#333;}
+.modal-title{font-size:22px;color:#1f56b3;margin-bottom:20px;text-align:center;font-weight:600;padding-bottom:15px;border-bottom:1px solid #f0f5ff;}
+.modal-txt{font-size:16px;color:#555;line-height:1.6;}
+.form-item{margin:12px 0;}
+.form-item label{display:block;font-size:14px;color:#666;margin-bottom:6px;}
+.form-item input{width:100%;height:40px;padding:0 12px;border:1px solid #e0e8f5;border-radius:8px;font-size:15px;transition:all 0.2s;}
+.form-item input:focus{outline:none;border-color:#4a90e2;box-shadow:0 0 0 3px rgba(74,144,226,0.1);}
+.submit-btn{width:100%;height:42px;background:#1f56b3;color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:500;cursor:pointer;margin-top:8px;transition:all 0.3s;}
+.submit-btn:hover{background:#165dff;}
+.reg-txt{text-align:center;margin-top:15px;font-size:14px;color:#666;}
+.reg-btn{color:#165dff;cursor:pointer;margin-left:5px;}
+.reg-btn:hover{text-decoration:underline;}
+.profile-header{text-align:center;margin-bottom:25px;}
+.profile-avatar{width:80px;height:80px;border-radius:50%;margin:0 auto 10px;display:flex;justify-content:center;align-items:center;font-size:40px;background:#f0f7ff;object-fit:cover;}
+.profile-info{margin:15px 0;font-size:16px;color:#333;display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f5f9ff;}
+.info-label{color:#666;}
+.edit-btn{font-size:14px;color:#165dff;cursor:pointer;}
+.edit-btn:hover{text-decoration:underline;}
+.gender-select{width:100%;height:40px;padding:0 12px;border:1px solid #e0e8f5;border-radius:8px;font-size:15px;color:#333;}
+.college-select{width:100%;height:40px;padding:0 12px;border:1px solid #e0e8f5;border-radius:8px;font-size:15px;color:#333;}
+.avatar-upload{margin-top:10px;}
+.upload-btn{font-size:14px;color:#165dff;cursor:pointer;text-decoration:underline;}
+#avatarInput{display:none;}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="btn-group">
+  <div class="btn" onclick="document.getElementById('m1').style.display='flex'">
+    <div class="icon">✉️</div>
+    <div class="icon-text">邮箱</div>
+  </div>
+  <div class="btn" onclick="document.getElementById('m2').style.display='flex'">
+    <div class="icon">👤</div>
+    <div class="icon-text">登录</div>
+  </div>
+</div>
+<div class="title">
+  <h1 class="main-title">元邮胶囊</h1>
+</div>
+<div class="middle-box">
+  <a href="{{ url_for('campus') }}" class="middle-btn left-btn">Explore</a>
+  <div class="middle-btn right-btn">My BUPT</div>
+</div>
+<div class="footer-box">
+  <div class="footer-btn" onclick="checkLoginThenShowProfile()">个人资料</div>
+  <div class="footer-btn">关于我们</div>
+</div>
+
+<!-- 消息弹窗 -->
+<div class="modal" id="m1" onclick="this.style.display='none'">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <span class="close-btn" onclick="document.getElementById('m1').style.display='none'">×</span>
+    <h3 class="modal-title">我的消息</h3>
+    <div class="modal-txt">欢迎来到元邮胶囊</div>
+  </div>
+</div>
+
+<!-- 登录弹窗 -->
+<div class="modal" id="m2" onclick="this.style.display='none'">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <span class="close-btn" onclick="document.getElementById('m2').style.display='none'">×</span>
+    <h3 class="modal-title">账号登录</h3>
+    <div class="form-item">
+      <label>用户名或学号</label>
+      <input type="text" placeholder="请输入用户名或学号" id="loginUsername">
+    </div>
+    <div class="form-item">
+      <label>密码</label>
+      <input type="password" placeholder="请输入密码" id="loginPassword">
+    </div>
+    <button class="submit-btn" onclick="saveLoginInfo()">登录</button>
+    <div class="reg-txt">未注册？<span class="reg-btn" onclick="document.getElementById('m2').style.display='none';document.getElementById('m3').style.display='flex'">立即注册</span></div>
+  </div>
+</div>
+
+<!-- 注册弹窗 -->
+<div class="modal" id="m3" onclick="this.style.display='none'">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <span class="close-btn" onclick="document.getElementById('m3').style.display='none'">×</span>
+    <h3 class="modal-title">账号注册</h3>
+    <div class="form-item">
+      <label>用户名</label>
+      <input type="text" placeholder="请设置用户名（至少3位）" id="regUsername">
+    </div>
+    <div class="form-item">
+      <label>密码</label>
+      <input type="password" placeholder="请设置密码（至少6位）" id="regPassword">
+    </div>
+    <div class="form-item">
+      <label>学号</label>
+      <input type="text" placeholder="请输入学号" id="regStudentId">
+    </div>
+    <button class="submit-btn" onclick="saveRegInfo()">完成注册</button>
+  </div>
+</div>
+
+<!-- 个人资料查看弹窗 -->
+<div class="modal" id="m4" onclick="this.style.display='none'">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <span class="close-btn" onclick="document.getElementById('m4').style.display='none'">×</span>
+    <h3 class="modal-title">个人资料</h3>
+    <div class="profile-header">
+      <div class="profile-avatar" id="profileAvatar">👨</div>
+    </div>
+    <div class="profile-info">
+      <span class="info-label">用户名</span>
+      <span id="showUsername">未登录</span>
+    </div>
+    <div class="profile-info">
+      <span class="info-label">昵称</span>
+      <span id="showNickname">未设置</span>
+    </div>
+    <div class="profile-info">
+      <span class="info-label">学号</span>
+      <span id="showStudentId">未设置</span>
+    </div>
+    <div class="profile-info">
+      <span class="info-label">性别</span>
+      <span id="showGender">未设置</span>
+    </div>
+    <div class="profile-info">
+      <span class="info-label">学院</span>
+      <span id="showCollege">未设置</span>
+    </div>
+    <div style="text-align:right;margin-top:20px;">
+      <span class="edit-btn" onclick="document.getElementById('m4').style.display='none';document.getElementById('m5').style.display='flex'">编辑资料</span>
+    </div>
+  </div>
+</div>
+
+<!-- 编辑资料弹窗 -->
+<div class="modal" id="m5" onclick="this.style.display='none'">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <span class="close-btn" onclick="document.getElementById('m5').style.display='none'">×</span>
+    <h3 class="modal-title">编辑资料</h3>
+    <div class="profile-header">
+      <div class="profile-avatar" id="editAvatar">👨</div>
+      <div class="avatar-upload">
+        <span class="upload-btn" onclick="document.getElementById('avatarInput').click()">选择本地头像</span>
+        <input type="file" id="avatarInput" accept="image/*" onchange="previewAvatar(this)">
+      </div>
+    </div>
+    <div class="form-item">
+      <label>昵称</label>
+      <input type="text" placeholder="请输入昵称" id="editNickname">
+    </div>
+    <div class="form-item">
+      <label>性别</label>
+      <select class="gender-select" id="editGender">
+        <option value="未设置">请选择性别</option>
+        <option value="男">男</option>
+        <option value="女">女</option>
+      </select>
+    </div>
+    <div class="form-item">
+      <label>学院</label>
+      <select class="college-select" id="editCollege">
+        <option value="未设置">请选择学院</option>
+        <option value="数字媒体与艺术设计学院">数字媒体与艺术设计学院</option>
+        <option value="信息与通信工程学院">信息与通信工程学院</option>
+        <option value="电子工程学院">电子工程学院</option>
+        <option value="计算机学院">计算机学院</option>
+        <option value="网络空间安全学院">网络空间安全学院</option>
+        <option value="智能工程与自动化学院">智能工程与自动化学院</option>
+      </select>
+    </div>
+    <button class="submit-btn" onclick="saveProfile()">保存修改</button>
+  </div>
+</div>
+
+<script>
+// 全局变量
+let currentUser = null;
+let avatarFile = null;
+
+// 页面加载时检查登录状态
+window.onload = function() {
+    checkLoginStatus();
+};
+
+// 检查登录状态
+async function checkLoginStatus() {
+    try {
+        const response = await fetch('/api/check-login');
+        const data = await response.json();
+
+        if (data.logged_in && data.user) {
+            currentUser = data.user;
+            // 如果有用户登录，可以在这里做一些初始化操作
+            console.log('用户已登录:', currentUser.username);
+        }
+    } catch (error) {
+        console.error('检查登录状态失败:', error);
+    }
+}
+
+// 核心：点个人资料先查登录，未登录弹登录框
+async function checkLoginThenShowProfile() {
+    try {
+        const response = await fetch('/api/check-login');
+        const data = await response.json();
+
+        if (data.logged_in && data.user) {
+            currentUser = data.user;
+            fillProfile();
+            document.getElementById('m4').style.display = 'flex';
+        } else {
+            alert('请先登录，再查看个人资料～');
+            document.getElementById('m2').style.display = 'flex';
+        }
+    } catch (error) {
+        console.error('检查登录状态失败:', error);
+        alert('请先登录，再查看个人资料～');
+        document.getElementById('m2').style.display = 'flex';
+    }
+}
+
+// 登录验证
+async function saveLoginInfo() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+
+    if (!username || !password) {
+        alert('用户名/学号和密码不能为空！');
+        return;
+    }
+
+    try {
+        // 显示加载状态
+        const submitBtn = document.querySelector('#m2 .submit-btn');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = '登录中...';
+        submitBtn.disabled = true;
+
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
+        });
+
+        const data = await response.json();
+
+        // 恢复按钮状态
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+
+        if (data.success) {
+            alert('登录成功！');
+            currentUser = data.user;
+            document.getElementById('m2').style.display = 'none';
+            // 清空表单
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+        } else {
+            alert(data.message || '登录失败！');
+        }
+    } catch (error) {
+        console.error('登录错误:', error);
+        alert('网络错误，请稍后重试');
+        // 恢复按钮状态
+        const submitBtn = document.querySelector('#m2 .submit-btn');
+        submitBtn.textContent = '登录';
+        submitBtn.disabled = false;
+    }
+}
+
+// 注册
+async function saveRegInfo() {
+    const username = document.getElementById('regUsername').value.trim();
+    const password = document.getElementById('regPassword').value.trim();
+    const studentId = document.getElementById('regStudentId').value.trim();
+
+    if (!username || !password || !studentId) {
+        alert('用户名、密码、学号不能为空！');
+        return;
+    }
+
+    if (username.length < 3) {
+        alert('用户名至少需要3个字符！');
+        return;
+    }
+
+    if (password.length < 6) {
+        alert('密码至少需要6个字符！');
+        return;
+    }
+
+    try {
+        // 显示加载状态
+        const submitBtn = document.querySelector('#m3 .submit-btn');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = '注册中...';
+        submitBtn.disabled = true;
+
+        const response = await fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password,
+                student_id: studentId
+            })
+        });
+
+        const data = await response.json();
+
+        // 恢复按钮状态
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+
+        if (data.success) {
+            alert('注册成功！已自动登录～');
+            currentUser = data.user;
+            document.getElementById('m3').style.display = 'none';
+            // 清空表单
+            document.getElementById('regUsername').value = '';
+            document.getElementById('regPassword').value = '';
+            document.getElementById('regStudentId').value = '';
+        } else {
+            alert(data.message || '注册失败！');
+        }
+    } catch (error) {
+        console.error('注册错误:', error);
+        alert('网络错误，请稍后重试');
+        // 恢复按钮状态
+        const submitBtn = document.querySelector('#m3 .submit-btn');
+        submitBtn.textContent = '完成注册';
+        submitBtn.disabled = false;
+    }
+}
+
+// 头像预览
+function previewAvatar(input) {
+    const file = input.files[0];
+    if (file) {
+        // 检查文件大小（限制2MB）
+        if (file.size > 2 * 1024 * 1024) {
+            alert('头像文件大小不能超过2MB！');
+            input.value = '';
+            return;
+        }
+
+        // 检查文件类型
+        const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!validTypes.includes(file.type)) {
+            alert('请选择jpg、png或gif格式的图片！');
+            input.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const avatar = document.getElementById('editAvatar');
+            avatar.innerHTML = '';
+            avatar.style.fontSize = '0';
+            avatar.style.background = '#fff';
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.borderRadius = '50%';
+            img.style.objectFit = 'cover';
+            avatar.appendChild(img);
+
+            // 保存文件对象，稍后上传
+            avatarFile = file;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// 填充个人资料到弹窗
+function fillProfile() {
+    if (!currentUser) return;
+
+    document.getElementById('showUsername').innerText = currentUser.username;
+    document.getElementById('showNickname').innerText = currentUser.nickname || currentUser.username;
+    document.getElementById('showStudentId').innerText = currentUser.student_id;
+    document.getElementById('showGender').innerText = currentUser.gender;
+    document.getElementById('showCollege').innerText = currentUser.college;
+
+    document.getElementById('editNickname').value = currentUser.nickname || currentUser.username;
+    document.getElementById('editGender').value = currentUser.gender;
+    document.getElementById('editCollege').value = currentUser.college;
+
+    // 头像回显
+    updateAvatarDisplay(currentUser.avatar);
+}
+
+// 更新头像显示
+function updateAvatarDisplay(avatarData) {
+    const editAvatar = document.getElementById('editAvatar');
+    const profileAvatar = document.getElementById('profileAvatar');
+
+    // 清空并设置默认
+    [editAvatar, profileAvatar].forEach(avatar => {
+        avatar.innerHTML = '';
+        avatar.style.fontSize = '40px';
+        avatar.style.background = '#f0f7ff';
+        avatar.textContent = '👨';
+    });
+
+    if (avatarData) {
+        [editAvatar, profileAvatar].forEach(avatar => {
+            avatar.innerHTML = '';
+            avatar.style.fontSize = '0';
+            avatar.style.background = '#fff';
+            const img = document.createElement('img');
+            img.src = avatarData;
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.borderRadius = '50%';
+            img.style.objectFit = 'cover';
+            avatar.appendChild(img);
+        });
+    }
+}
+
+// 保存资料
+async function saveProfile() {
+    if (!currentUser) {
+        alert('请先登录！');
+        return;
+    }
+
+    const nickname = document.getElementById('editNickname').value.trim();
+    const gender = document.getElementById('editGender').value;
+    const college = document.getElementById('editCollege').value;
+
+    if (!nickname) {
+        alert('昵称不能为空！');
+        return;
+    }
+
+    try {
+        // 显示加载状态
+        const submitBtn = document.querySelector('#m5 .submit-btn');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = '保存中...';
+        submitBtn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('nickname', nickname);
+        formData.append('gender', gender);
+        formData.append('college', college);
+
+        if (avatarFile) {
+            formData.append('avatar', avatarFile);
+        }
+
+        const response = await fetch('/api/update-profile', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        // 恢复按钮状态
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+
+        if (data.success) {
+            currentUser = data.user;
+
+            // 更新显示
+            document.getElementById('showNickname').innerText = nickname;
+            document.getElementById('showGender').innerText = gender;
+            document.getElementById('showCollege').innerText = college;
+
+            // 更新头像显示
+            if (data.user.avatar) {
+                updateAvatarDisplay(data.user.avatar);
+            }
+
+            alert('资料保存成功！');
+            document.getElementById('m5').style.display = 'none';
+            document.getElementById('m4').style.display = 'flex';
+
+            // 重置文件
+            avatarFile = null;
+        } else {
+            alert(data.message || '保存失败');
+        }
+    } catch (error) {
+        console.error('保存资料错误:', error);
+        alert('保存失败，请重试');
+        // 恢复按钮状态
+        const submitBtn = document.querySelector('#m5 .submit-btn');
+        submitBtn.textContent = '保存修改';
+        submitBtn.disabled = false;
+    }
+}
+
+// 辅助函数：显示/隐藏模态框
+function showModal(modalId) {
+    document.getElementById(modalId).style.display = 'flex';
+}
+
+function hideModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+// 点击模态框外部关闭
+document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.style.display = 'none';
+        }
+    });
+});
+</script>
+</body>
+</html>

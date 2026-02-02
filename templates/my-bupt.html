@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My BUPT - 我的校园日记</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #87CEEB 0%, #98D8F0 30%, #B0E2FF 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 蓝天白云背景 */
+        .sky-background {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: floatCloud 60s infinite linear;
+        }
+
+        .sun {
+            position: absolute;
+            top: 60px;
+            right: 100px;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #FFD700 0%, #FF8C00 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 80px #FFA500;
+            animation: sunGlow 4s infinite alternate;
+        }
+
+        @keyframes sunGlow {
+            0% { box-shadow: 0 0 60px #FFA500; }
+            100% { box-shadow: 0 0 100px #FFD700; }
+        }
+
+        @keyframes floatCloud {
+            0% { transform: translateX(-200px); }
+            100% { transform: translateX(calc(100vw + 200px)); }
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(255,255,255,0.5);
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.25);
+            padding: 10px 20px;
+            border-radius: 50px;
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.4);
+            transform: translateX(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .main-container {
+            padding-top: 100px;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* 蜿蜒小路容器 */
+        .path-container {
+            position: relative;
+            width: 100%;
+            height: 2000px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        /* 地面 */
+        .ground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(to top, #8B4513 0%, #A0522D 30%, #D2691E 100%);
+            z-index: 1;
+        }
+
+        /* 真正的蜿蜒小路 - 使用SVG路径 */
+        .winding-path-svg {
+            position: absolute;
+            top: 200px;
+            left: 0;
+            width: 100%;
+            height: 1600px;
+            z-index: 2;
+        }
+
+        .path-curve {
+            fill: none;
+            stroke: #DEB887;
+            stroke-width: 12;
+            stroke-linecap: round;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+
+        .path-inner {
+            fill: none;
+            stroke: #F5DEB3;
+            stroke-width: 8;
+            stroke-linecap: round;
+        }
+
+        /* 草地区域 */
+        .grass-area {
+            position: absolute;
+            top: 200px;
+            left: 0;
+            width: 100%;
+            height: 1600px;
+            background: linear-gradient(to bottom,
+                rgba(34, 139, 34, 0.1) 0%,
+                rgba(50, 205, 50, 0.2) 20%,
+                rgba(60, 179, 113, 0.3) 50%,
+                rgba(46, 139, 87, 0.4) 80%,
+                rgba(0, 100, 0, 0.5) 100%);
+            z-index: 1;
+        }
+
+        /* 场景容器 - 沿着蜿蜒路径分布 */
+        .scene-container {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10;
+            text-align: center;
+            width: 130px;
+            filter: drop-shadow(0 8px 20px rgba(0,0,0,0.3));
+        }
+
+        .scene-container:hover {
+            transform: scale(1.3) translateY(-15px);
+            z-index: 20;
+            filter: drop-shadow(0 12px 30px rgba(0,0,0,0.4));
+        }
+
+        .scene-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            border: 3px solid white;
+            margin: 0 auto 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            transition: all 0.4s;
+        }
+
+        .scene-container:hover .scene-image {
+            transform: rotate(15deg) scale(1.15);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            border-color: #FFD700;
+        }
+
+        .scene-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s;
+        }
+
+        .scene-container:hover .scene-image img {
+            transform: scale(1.2);
+        }
+
+        .scene-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            z-index: 1;
+            transition: all 0.3s;
+        }
+
+        .scene-container:hover .scene-image::before {
+            opacity: 0.1;
+        }
+
+        .scene-icon {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            z-index: 2;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+
+        .scene-container:hover .scene-icon {
+            transform: scale(1.3) rotate(20deg);
+            background: #FFD700;
+        }
+
+        .scene-name {
+            background: rgba(44, 62, 80, 0.9);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            opacity: 0;
+            transition: all 0.4s;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transform: translateY(10px) scale(0.9);
+            display: inline-block;
+        }
+
+        .scene-container:hover .scene-name {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* 树木装饰 */
+        .tree {
+            position: absolute;
+            z-index: 3;
+            animation: sway 8s infinite ease-in-out;
+        }
+
+        .tree-trunk {
+            width: 20px;
+            height: 80px;
+            background: #8B4513;
+            border-radius: 10px;
+            margin: 0 auto;
+        }
+
+        .tree-top {
+            width: 100px;
+            height: 100px;
+            background: #228B22;
+            border-radius: 50%;
+            margin-top: -60px;
+            position: relative;
+        }
+
+        .tree-top::before, .tree-top::after {
+            content: '';
+            position: absolute;
+            background: #228B22;
+            border-radius: 50%;
+        }
+
+        .tree-top::before {
+            width: 80px;
+            height: 80px;
+            top: -20px;
+            left: 10px;
+        }
+
+        .tree-top::after {
+            width: 60px;
+            height: 60px;
+            top: -40px;
+            left: 20px;
+        }
+
+        @keyframes sway {
+            0%, 100% { transform: translateX(0) rotate(0); }
+            33% { transform: translateX(3px) rotate(1deg); }
+            66% { transform: translateX(-3px) rotate(-1deg); }
+        }
+
+        /* 花朵装饰 */
+        .flower {
+            position: absolute;
+            z-index: 4;
+            animation: sway 6s infinite ease-in-out;
+        }
+
+        .flower-stem {
+            width: 3px;
+            height: 40px;
+            background: #228B22;
+            margin: 0 auto;
+        }
+
+        .flower-head {
+            width: 30px;
+            height: 30px;
+            background: #FF69B4;
+            border-radius: 50%;
+            margin-top: -15px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFD700;
+            font-size: 12px;
+        }
+
+        /* 小鸟 */
+        .bird {
+            position: absolute;
+            color: #333;
+            font-size: 24px;
+            animation: fly 15s infinite linear;
+            z-index: 0;
+        }
+
+        @keyframes fly {
+            0% { transform: translateX(-100px) translateY(0); }
+            25% { transform: translateX(25vw) translateY(-30px); }
+            50% { transform: translateX(50vw) translateY(0); }
+            75% { transform: translateX(75vw) translateY(20px); }
+            100% { transform: translateX(calc(100vw + 100px)) translateY(0); }
+        }
+
+        /* 蝴蝶 */
+        .butterfly {
+            position: absolute;
+            color: #FF69B4;
+            font-size: 20px;
+            animation: flutter 8s infinite ease-in-out;
+            z-index: 0;
+        }
+
+        @keyframes flutter {
+            0%, 100% { transform: translateY(0) rotate(0); }
+            25% { transform: translateY(-20px) rotate(10deg); }
+            50% { transform: translateY(0) rotate(0); }
+            75% { transform: translateY(-10px) rotate(-10deg); }
+        }
+
+        /* 日记本弹窗 */
+        .diary-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .diary-container {
+            width: 90%;
+            max-width: 900px;
+            height: 85vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 20px;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+            overflow: hidden;
+            display: flex;
+            animation: slideUp 0.4s ease;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* 日记本左侧 - 封面 */
+        .diary-cover {
+            width: 30%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .diary-cover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA4KSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNwYXR0ZXJuKSIvPjwvc3ZnPg==');
+        }
+
+        .diary-location-emoji {
+            font-size: 52px;
+            margin-bottom: 20px;
+            z-index: 1;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .diary-title {
+            font-size: 30px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-align: center;
+            text-shadow: 0 2px 15px rgba(0,0,0,0.3);
+            z-index: 1;
+        }
+
+        .diary-location {
+            font-size: 18px;
+            margin-bottom: 30px;
+            text-align: center;
+            opacity: 0.95;
+            z-index: 1;
+            padding: 8px 20px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 25px;
+            backdrop-filter: blur(5px);
+        }
+
+        /* 日记本右侧 - 内容区 */
+        .diary-content {
+            width: 70%;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            color: #666;
+            transition: all 0.3s;
+            z-index: 2;
+        }
+
+        .close-btn:hover {
+            background: rgba(0,0,0,0.2);
+            color: #333;
+            transform: rotate(90deg);
+        }
+
+        .diary-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            padding: 10px 25px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        /* 查看日记区域 */
+        .diary-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .diary-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .diary-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .diary-date {
+            font-size: 14px;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .diary-preview {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .no-diaries {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 16px;
+        }
+
+        /* 写日记区域 */
+        .write-diary {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            display: none;
+        }
+
+        .diary-textarea {
+            flex: 1;
+            width: 100%;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            line-height: 1.6;
+            resize: none;
+            margin-bottom: 20px;
+            background: white;
+            transition: all 0.3s;
+        }
+
+        .diary-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .diary-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .save-btn, .cancel-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .cancel-btn {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .cancel-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        /* 日记详情弹窗 */
+        .diary-detail-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1100;
+            backdrop-filter: blur(10px);
+        }
+
+        .diary-detail {
+            width: 80%;
+            max-width: 600px;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+            animation: slideUp 0.4s ease;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .detail-date {
+            font-size: 18px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .detail-location {
+            font-size: 16px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .detail-content {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 30px;
+            white-space: pre-wrap;
+        }
+
+        .detail-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .delete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 71, 87, 0.3);
+        }
+
+        /* 加载占位图 */
+        .scene-image.fallback {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .diary-container {
+                flex-direction: column;
+                height: 90vh;
+            }
+
+            .diary-cover {
+                width: 100%;
+                height: 30%;
+                padding: 20px;
+            }
+
+            .diary-content {
+                width: 100%;
+                height: 70%;
+                padding: 20px;
+            }
+
+            .diary-title {
+                font-size: 24px;
+            }
+
+            .scene-container {
+                width: 110px;
+            }
+
+            .scene-image {
+                width: 85px;
+                height: 85px;
+            }
+
+            .path-container {
+                height: 1800px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .scene-container {
+                width: 95px;
+            }
+
+            .scene-image {
+                width: 75px;
+                height: 75px;
+            }
+
+            .scene-name {
+                font-size: 11px;
+                padding: 5px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 蓝天白云背景 -->
+    <div class="sky-background">
+        <div class="sun"></div>
+        <!-- 云朵 -->
+        <div class="cloud" style="top: 15%; width: 200px; height: 60px; animation-delay: 0s;"></div>
+        <div class="cloud" style="top: 25%; width: 150px; height: 45px; animation-delay: 15s;"></div>
+        <div class="cloud" style="top: 35%; width: 180px; height: 50px; animation-delay: 30s;"></div>
+        <div class="cloud" style="top: 45%; width: 120px; height: 35px; animation-delay: 45s;"></div>
+
+        <!-- 小鸟 -->
+        <div class="bird" style="top: 20%; animation-delay: 0s;">🐦</div>
+        <div class="bird" style="top: 30%; animation-delay: 5s;">🕊️</div>
+
+        <!-- 蝴蝶 -->
+        <div class="butterfly" style="top: 25%; left: 20%; animation-delay: 2s;">🦋</div>
+        <div class="butterfly" style="top: 35%; left: 60%; animation-delay: 6s;">🦋</div>
+    </div>
+
+    <!-- 头部 -->
+    <div class="header">
+        <h1>📖 My BUPT - 我的校园日记</h1>
+        <a href="javascript:window.history.back();" class="back-btn">← 返回</a>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-container">
+        <div class="path-container">
+            <!-- 地面 -->
+            <div class="ground"></div>
+
+            <!-- 草地区域 -->
+            <div class="grass-area"></div>
+
+            <!-- 真正的蜿蜒小路 - SVG路径 -->
+            <svg class="winding-path-svg" viewBox="0 0 1000 1600">
+                <!-- 主要的蜿蜒路径 -->
+                <path class="path-curve" d="M500,200 Q300,400 500,600 Q700,800 500,1000 Q300,1200 500,1400 Q700,1600 500,1800" />
+                <path class="path-inner" d="M500,200 Q300,400 500,600 Q700,800 500,1000 Q300,1200 500,1400 Q700,1600 500,1800" />
+            </svg>
+
+            <!-- 16个校园场景 -->
+            <!-- 场景会通过JavaScript动态添加 -->
+        </div>
+    </div>
+
+    <!-- 日记本弹窗 -->
+    <div class="diary-modal" id="diaryModal">
+        <div class="diary-container">
+            <!-- 左侧封面 -->
+            <div class="diary-cover">
+                <div class="diary-location-emoji" id="diaryEmoji">🏛️</div>
+                <h2 class="diary-title">校园日记本</h2>
+                <div class="diary-location" id="diaryLocation">地点：未选择</div>
+            </div>
+
+            <!-- 右侧内容 -->
+            <div class="diary-content">
+                <div class="close-btn" onclick="closeDiaryModal()">×</div>
+
+                <!-- 标签页 -->
+                <div class="diary-tabs">
+                    <button class="tab-btn active" onclick="switchTab('view')">📖 查看日记</button>
+                    <button class="tab-btn" onclick="switchTab('write')">✏️ 写日记</button>
+                </div>
+
+                <!-- 查看日记区域 -->
+                <div class="diary-list" id="diaryList">
+                    <!-- 日记项会动态加载 -->
+                </div>
+
+                <!-- 写日记区域 -->
+                <div class="write-diary" id="writeDiary">
+                    <textarea class="diary-textarea" id="diaryContent" placeholder="在这里写下你的校园回忆... ✨ 让时光停留在此刻"></textarea>
+                    <div class="diary-actions">
+                        <button class="cancel-btn" onclick="clearDiaryText()">清空</button>
+                        <button class="save-btn" onclick="saveDiary()">💾 保存日记</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 日记详情弹窗 -->
+    <div class="diary-detail-modal" id="diaryDetailModal">
+        <div class="diary-detail">
+            <div class="detail-header">
+                <div>
+                    <div class="detail-date" id="detailDate">2023年11月5日 14:30</div>
+                    <div class="detail-location" id="detailLocation">地点：体育场</div>
+                </div>
+                <div class="close-btn" onclick="closeDetailModal()">×</div>
+            </div>
+            <div class="detail-content" id="detailContent">
+                这里是日记内容...
+            </div>
+            <div class="detail-actions">
+                <button class="delete-btn" onclick="deleteDiary()">🗑️ 删除这篇日记</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API基础URL
+        const API_BASE = '/api';
+
+        // 校园场景数据
+        const campusScenes = [
+            { id: 1, name: "体育场", emoji: "🏟️", image: "/static/体育场.jpg" },
+            { id: 2, name: "教学实验综合楼", emoji: "🏢", image: "/static/教学实验综合楼.jpg" },
+            { id: 3, name: "图书馆", emoji: "📚", image: "/static/图书馆.jpg" },
+            { id: 4, name: "宿舍楼", emoji: "🏠", image: "/static/宿舍楼.jpg" },
+            { id: 5, name: "礼堂", emoji: "🎭", image: "/static/礼堂.jpg" },
+            { id: 6, name: "学生餐厅", emoji: "🍽️", image: "/static/学生餐厅.jpg" },
+            { id: 7, name: "校园湖", emoji: "🌊", image: "/static/校园湖.jpg" },
+            { id: 8, name: "马克思主义学院", emoji: "📘", image: "/static/马克思主义学院.jpg" },
+            { id: 9, name: "工程实验楼", emoji: "🔬", image: "/static/工程实验楼.jpg" },
+            { id: 10, name: "理学院", emoji: "🧮", image: "/static/理学院.jpg" },
+            { id: 11, name: "智能工程与自动化学院", emoji: "🤖", image: "/static/智能工程与自动化学院.jpg" },
+            { id: 12, name: "数字媒体与艺术设计学院", emoji: "🎨", image: "/static/数字媒体与艺术设计学院.jpg" },
+            { id: 13, name: "网络空间安全学院", emoji: "🛡️", image: "/static/网络空间安全学院.jpg" },
+            { id: 14, name: "学生活动中心", emoji: "🎉", image: "/static/学生活动中心.jpg" },
+            { id: 15, name: "教职工食堂", emoji: "👨‍🏫", image: "/static/教职工食堂.jpg" },
+            { id: 16, name: "天猫超市", emoji: "🛒", image: "/static/天猫超市.jpg" }
+        ];
+
+        let currentLocation = "";
+        let currentDiaryId = "";
+        let currentUser = null;
+
+        // 页面加载时初始化
+        window.onload = async function() {
+            // 检查登录状态
+            await checkLoginStatus();
+
+            if (!currentUser) {
+                // 如果未登录，跳转回首页
+                showAlert('请先登录！', 'error');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+                return;
+            }
+
+            // 添加更多云朵
+            createClouds();
+
+            // 创建蜿蜒小路上的场景
+            createScenesOnCurvedPath();
+
+            // 添加树木和花朵装饰
+            createDecorations();
+        };
+
+        // 检查登录状态
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/check-login`);
+                const data = await response.json();
+
+                if (data.logged_in && data.user) {
+                    currentUser = data.user;
+                }
+            } catch (error) {
+                console.error('检查登录状态失败:', error);
+            }
+        }
+
+        // 创建更多云朵
+        function createClouds() {
+            const sky = document.querySelector('.sky-background');
+            for (let i = 0; i < 6; i++) {
+                const cloud = document.createElement('div');
+                cloud.className = 'cloud';
+                cloud.style.top = `${Math.random() * 40 + 10}%`;
+                cloud.style.left = `${Math.random() * 20}%`;
+                cloud.style.width = `${Math.random() * 150 + 80}px`;
+                cloud.style.height = `${Math.random() * 40 + 25}px`;
+                cloud.style.opacity = Math.random() * 0.4 + 0.3;
+                cloud.style.animationDelay = `${Math.random() * 60}s`;
+                cloud.style.animationDuration = `${Math.random() * 40 + 40}s`;
+                sky.appendChild(cloud);
+            }
+        }
+
+        // 在蜿蜒小路上分布场景
+        function createScenesOnCurvedPath() {
+            const container = document.querySelector('.path-container');
+
+            // 蜿蜒路径的贝塞尔曲线参数
+            // M500,200 Q300,400 500,600 Q700,800 500,1000 Q300,1200 500,1400 Q700,1600 500,1800
+            const pathSegments = [
+                { start: {x: 500, y: 200}, cp: {x: 300, y: 400}, end: {x: 500, y: 600} },
+                { start: {x: 500, y: 600}, cp: {x: 700, y: 800}, end: {x: 500, y: 1000} },
+                { start: {x: 500, y: 1000}, cp: {x: 300, y: 1200}, end: {x: 500, y: 1400} },
+                { start: {x: 500, y: 1400}, cp: {x: 700, y: 1600}, end: {x: 500, y: 1800} }
+            ];
+
+            // 将16个场景分布在路径上
+            campusScenes.forEach((scene, index) => {
+                // 计算场景在路径上的位置（0-1之间）
+                const t = (index + 1) / (campusScenes.length + 1);
+
+                // 确定在哪个路径段上
+                const segmentIndex = Math.floor(t * pathSegments.length);
+                const segment = pathSegments[segmentIndex];
+                const segmentT = (t * pathSegments.length) - segmentIndex;
+
+                // 计算贝塞尔曲线上的点
+                const point = calculateBezierPoint(segment.start, segment.cp, segment.end, segmentT);
+
+                // 转换为页面坐标（SVG视图框到页面）
+                const xPercent = (point.x / 1000) * 100;
+                const yPercent = (point.y / 1800) * 100 + 10; // 调整垂直位置
+
+                // 添加随机偏移，让分布更自然
+                const randomXOffset = (Math.random() - 0.5) * 8; // -4%到4%
+                const randomYOffset = (Math.random() - 0.5) * 6; // -3%到3%
+
+                // 决定在路径的哪一侧（左右交替）
+                const side = index % 2 === 0 ? 1 : -1;
+                const sideOffset = 15 * side; // 离路径的距离
+
+                // 创建场景元素
+                const sceneDiv = document.createElement('div');
+                sceneDiv.className = 'scene-container';
+                sceneDiv.style.top = `calc(${yPercent}% + ${randomYOffset}%)`;
+                sceneDiv.style.left = `calc(${xPercent}% + ${randomXOffset}% + ${sideOffset}%)`;
+                sceneDiv.setAttribute('data-location', scene.name);
+                sceneDiv.setAttribute('data-emoji', scene.emoji);
+
+                // 添加轻微旋转，使场景朝向路径
+                const rotation = side * (Math.random() * 15 - 7.5); // -7.5到7.5度
+                sceneDiv.style.transform = `rotate(${rotation}deg)`;
+
+                // 创建图片元素
+                const imageDiv = document.createElement('div');
+                imageDiv.className = 'scene-image';
+
+                const img = document.createElement('img');
+                img.src = scene.image;
+                img.alt = scene.name;
+                img.loading = 'lazy';
+                img.onerror = function() {
+                    // 如果图片加载失败，显示emoji作为后备
+                    this.style.display = 'none';
+                    imageDiv.classList.add('fallback');
+                    imageDiv.innerHTML = `<span>${scene.emoji}</span>`;
+                };
+
+                // 创建图标
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'scene-icon';
+                iconDiv.textContent = scene.emoji;
+
+                // 创建名称标签
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'scene-name';
+                nameDiv.textContent = scene.name;
+
+                imageDiv.appendChild(img);
+                imageDiv.appendChild(iconDiv);
+
+                sceneDiv.appendChild(imageDiv);
+                sceneDiv.appendChild(nameDiv);
+
+                // 点击事件
+                sceneDiv.onclick = () => openDiary(scene.name, scene.emoji);
+
+                container.appendChild(sceneDiv);
+            });
+        }
+
+        // 计算二次贝塞尔曲线上的点
+        function calculateBezierPoint(start, cp, end, t) {
+            return {
+                x: (1 - t) * (1 - t) * start.x + 2 * (1 - t) * t * cp.x + t * t * end.x,
+                y: (1 - t) * (1 - t) * start.y + 2 * (1 - t) * t * cp.y + t * t * end.y
+            };
+        }
+
+        // 创建装饰元素（树木和花朵）
+        function createDecorations() {
+            const container = document.querySelector('.path-container');
+
+            // 添加树木
+            for (let i = 0; i < 15; i++) {
+                const tree = document.createElement('div');
+                tree.className = 'tree';
+                tree.style.top = `${Math.random() * 60 + 30}%`;
+                tree.style.left = `${Math.random() * 90 + 5}%`;
+                tree.style.transform = `scale(${Math.random() * 0.5 + 0.7})`;
+                tree.style.animationDelay = `${Math.random() * 8}s`;
+
+                const trunk = document.createElement('div');
+                trunk.className = 'tree-trunk';
+
+                const top = document.createElement('div');
+                top.className = 'tree-top';
+
+                tree.appendChild(trunk);
+                tree.appendChild(top);
+                container.appendChild(tree);
+            }
+
+            // 添加花朵
+            for (let i = 0; i < 25; i++) {
+                const flower = document.createElement('div');
+                flower.className = 'flower';
+                flower.style.top = `${Math.random() * 70 + 30}%`;
+                flower.style.left = `${Math.random() * 90 + 5}%`;
+                flower.style.transform = `scale(${Math.random() * 0.4 + 0.6})`;
+                flower.style.animationDelay = `${Math.random() * 6}s`;
+
+                const stem = document.createElement('div');
+                stem.className = 'flower-stem';
+
+                const head = document.createElement('div');
+                head.className = 'flower-head';
+                head.textContent = '🌸';
+
+                flower.appendChild(stem);
+                flower.appendChild(head);
+                container.appendChild(flower);
+            }
+        }
+
+        // 打开日记本
+        function openDiary(location, emoji) {
+            currentLocation = location;
+
+            // 更新弹窗信息
+            document.getElementById('diaryEmoji').textContent = emoji;
+            document.getElementById('diaryLocation').textContent = `地点：${location}`;
+
+            // 加载该地点的日记
+            loadDiariesForLocation(location);
+
+            // 显示弹窗
+            document.getElementById('diaryModal').style.display = 'flex';
+
+            // 默认显示查看日记标签页
+            switchTab('view');
+
+            // 清空写日记区域
+            document.getElementById('diaryContent').value = '';
+        }
+
+        // 关闭日记本弹窗
+        function closeDiaryModal() {
+            document.getElementById('diaryModal').style.display = 'none';
+        }
+
+        // 切换标签页
+        function switchTab(tab) {
+            // 更新按钮状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            if (tab === 'view') {
+                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+                document.getElementById('diaryList').style.display = 'block';
+                document.getElementById('writeDiary').style.display = 'none';
+            } else {
+                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+                document.getElementById('diaryList').style.display = 'none';
+                document.getElementById('writeDiary').style.display = 'flex';
+            }
+        }
+
+        // 加载指定地点的日记 - 连接到后端API
+        async function loadDiariesForLocation(location) {
+            const diaryList = document.getElementById('diaryList');
+            diaryList.innerHTML = '<div class="no-diaries">加载中...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/bupt/diaries/${encodeURIComponent(location)}`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    diaryList.innerHTML = `
+                        <div class="no-diaries">
+                            <div style="font-size: 48px; margin-bottom: 15px;">📝</div>
+                            <div>加载日记失败</div>
+                            <div style="font-size: 14px; color: #999; margin-top: 10px;">请稍后重试</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const locationDiaries = data.diaries || [];
+
+                if (locationDiaries.length === 0) {
+                    diaryList.innerHTML = `
+                        <div class="no-diaries">
+                            <div style="font-size: 48px; margin-bottom: 15px;">📝</div>
+                            <div>还没有关于${location}的日记</div>
+                            <div style="font-size: 14px; color: #999; margin-top: 10px;">点击上方"写日记"开始记录吧～</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // 生成日记列表HTML
+                const diariesHTML = locationDiaries.map((diary, index) => {
+                    // 截取前100个字符作为预览
+                    const preview = diary.content.length > 100 ?
+                        diary.content.substring(0, 100) + '...' :
+                        diary.content;
+
+                    return `
+                        <div class="diary-item" onclick="viewDiaryDetail('${diary.id}')">
+                            <div class="diary-date">📅 ${formatDate(diary.created_at)}</div>
+                            <div class="diary-preview">${preview}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                diaryList.innerHTML = diariesHTML;
+
+            } catch (error) {
+                console.error('加载日记失败:', error);
+                diaryList.innerHTML = `
+                    <div class="no-diaries">
+                        <div style="font-size: 48px; margin-bottom: 15px;">📝</div>
+                        <div>加载日记失败</div>
+                        <div style="font-size: 14px; color: #999; margin-top: 10px;">网络错误，请稍后重试</div>
+                    </div>
+                `;
+            }
+        }
+
+        // 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+        }
+
+        // 保存日记 - 连接到后端API
+        async function saveDiary() {
+            const content = document.getElementById('diaryContent').value.trim();
+
+            if (!content) {
+                showAlert('日记内容不能为空哦～', 'error');
+                return;
+            }
+
+            if (!currentLocation) {
+                showAlert('请先选择地点！', 'error');
+                return;
+            }
+
+            if (!currentUser) {
+                showAlert('请先登录！', 'error');
+                return;
+            }
+
+            try {
+                // 显示加载状态
+                const saveBtn = document.querySelector('.save-btn');
+                const originalText = saveBtn.textContent;
+                saveBtn.textContent = '保存中...';
+                saveBtn.disabled = true;
+
+                const response = await fetch(`${API_BASE}/bupt/diaries`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        location: currentLocation,
+                        content: content
+                    })
+                });
+
+                const data = await response.json();
+
+                // 恢复按钮状态
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+
+                if (data.success) {
+                    // 清空文本框
+                    document.getElementById('diaryContent').value = '';
+
+                    // 显示成功消息
+                    showAlert('日记保存成功！', 'success');
+
+                    // 切换到查看标签页并刷新列表
+                    switchTab('view');
+                    await loadDiariesForLocation(currentLocation);
+
+                } else {
+                    showAlert(data.message || '保存失败', 'error');
+                }
+            } catch (error) {
+                console.error('保存日记失败:', error);
+                showAlert('保存失败，请检查网络连接', 'error');
+                const saveBtn = document.querySelector('.save-btn');
+                saveBtn.textContent = '💾 保存日记';
+                saveBtn.disabled = false;
+            }
+        }
+
+        // 清空日记文本框
+        function clearDiaryText() {
+            if (confirm('确定要清空当前日记内容吗？')) {
+                document.getElementById('diaryContent').value = '';
+            }
+        }
+
+        // 查看日记详情 - 连接到后端API
+        async function viewDiaryDetail(diaryId) {
+            try {
+                const response = await fetch(`${API_BASE}/bupt/diaries/detail/${diaryId}`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    showAlert('加载日记详情失败', 'error');
+                    return;
+                }
+
+                const diary = data.diary;
+
+                // 保存当前日记ID（用于删除操作）
+                currentDiaryId = diary.id;
+                currentLocation = diary.location;
+
+                // 更新详情弹窗内容
+                document.getElementById('detailDate').textContent = formatDate(diary.created_at);
+                document.getElementById('detailLocation').textContent = `地点：${diary.location}`;
+                document.getElementById('detailContent').textContent = diary.content;
+
+                // 显示详情弹窗
+                document.getElementById('diaryDetailModal').style.display = 'flex';
+
+            } catch (error) {
+                console.error('查看日记详情失败:', error);
+                showAlert('加载日记详情失败', 'error');
+            }
+        }
+
+        // 关闭详情弹窗
+        function closeDetailModal() {
+            document.getElementById('diaryDetailModal').style.display = 'none';
+        }
+
+        // 删除日记 - 连接到后端API
+        async function deleteDiary() {
+            if (!confirm('确定要删除这篇日记吗？删除后无法恢复。')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/bupt/diaries/${currentDiaryId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // 关闭详情弹窗
+                    closeDetailModal();
+
+                    // 重新加载日记列表
+                    await loadDiariesForLocation(currentLocation);
+
+                    // 显示成功消息
+                    showAlert('日记已删除', 'success');
+                } else {
+                    showAlert(data.message || '删除失败', 'error');
+                }
+            } catch (error) {
+                console.error('删除日记失败:', error);
+                showAlert('删除失败，请检查网络连接', 'error');
+            }
+        }
+
+        // 显示消息提示
+        function showAlert(message, type) {
+            const colors = {
+                success: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                error: 'linear-gradient(135deg, #ff4757 0%, #ff3742 100%)'
+            };
+
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = message;
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: ${colors[type] || colors.success};
+                color: white;
+                padding: 15px 25px;
+                border-radius: 12px;
+                z-index: 2000;
+                box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+                font-weight: 600;
+                animation: slideInRight 0.4s ease;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.2);
+            `;
+            document.body.appendChild(messageDiv);
+
+            setTimeout(() => {
+                messageDiv.style.animation = 'slideOutRight 0.4s ease';
+                setTimeout(() => document.body.removeChild(messageDiv), 400);
+            }, 2000);
+
+            // 添加动画样式（如果不存在）
+            if (!document.getElementById('alertAnimations')) {
+                const style = document.createElement('style');
+                style.id = 'alertAnimations';
+                style.textContent = `
+                    @keyframes slideInRight {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOutRight {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        // ESC键关闭弹窗
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (document.getElementById('diaryModal').style.display === 'flex') {
+                    closeDiaryModal();
+                }
+                if (document.getElementById('diaryDetailModal').style.display === 'flex') {
+                    closeDetailModal();
+                }
+            }
+        });
+
+        // 点击弹窗外层关闭
+        document.getElementById('diaryModal').onclick = function(e) {
+            if (e.target === this) closeDiaryModal();
+        };
+        document.getElementById('diaryDetailModal').onclick = function(e) {
+            if (e.target === this) closeDetailModal();
+        };
+    </script>
+</body>
+</html>

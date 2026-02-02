@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>元邮胶囊 - 校园记忆</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+/* ===== 原有 CSS 完全不变，此处省略，直接用你原来的全部样式 ===== */
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei", "微软雅黑", "PingFang SC", sans-serif;}
+body{background:#f5f8fc;color:#333;line-height:1.6;overflow-x:hidden;}
+.bg{
+  position:fixed;
+  width:100%;
+  height:100%;
+  background:url(/static/bg.jpg) center/cover no-repeat;
+  opacity:0.7;
+  filter:blur(1.5px) brightness(1.05);
+  z-index:-1;
+}
+.bg::after{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:linear-gradient(135deg, rgba(120, 180, 255, 0.15) 0%, rgba(255, 255, 255, 0.1) 100%);
+}
+
+/* 页面顶部样式优化 */
+.header{
+  padding:30px 25px 25px;
+  text-align:center;
+  position:relative;
+  background:linear-gradient(to bottom, rgba(255,255,255,0.98), rgba(255,255,255,0.85));
+  border-bottom:1px solid rgba(31,86,179,0.08);
+  box-shadow:0 4px 20px rgba(31,86,179,0.08);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+
+.back-btn{
+  position:absolute;
+  left:25px;
+  top:50%;
+  transform:translateY(-50%);
+  background:linear-gradient(135deg, #fff, #f8fbff);
+  padding:10px 20px;
+  border-radius:12px;
+  color:#1f56b3;
+  cursor:pointer;
+  text-decoration:none;
+  border:1px solid rgba(31,86,179,0.12);
+  transition:all 0.3s ease;
+  font-weight:600;
+  font-size:15px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  box-shadow:0 3px 12px rgba(31,86,179,0.1);
+}
+.back-btn:hover{
+  background:linear-gradient(135deg, #f0f5ff, #e8f0ff);
+  transform:translateY(-50%) translateX(-2px);
+  box-shadow:0 6px 18px rgba(31,86,179,0.18);
+  border-color:rgba(31,86,179,0.2);
+}
+
+.page-title{
+  color:#1f56b3;
+  font-size:38px;
+  margin:0 0 8px;
+  font-weight:700;
+  letter-spacing:0.5px;
+  text-shadow:0 2px 8px rgba(31,86,179,0.12);
+  background:linear-gradient(135deg, #1f56b3, #3a7bd5);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.subtitle{
+  color:#6a8bc5;
+  font-size:16px;
+  font-weight:400;
+  opacity:0.9;
+  letter-spacing:0.3px;
+}
+
+/* 建筑卡片区域优化 */
+.building-container{
+  width:94%;
+  max-width:1280px;
+  margin:35px auto;
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
+  gap:22px;
+  padding:5px;
+}
+
+.building-card{
+  background:#fff;
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 6px 20px rgba(0,0,0,0.08);
+  cursor:pointer;
+  transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  position:relative;
+  border:1px solid rgba(255,255,255,0.8);
+}
+.building-card:hover{
+  transform:translateY(-10px) scale(1.02);
+  box-shadow:0 15px 35px rgba(31,86,179,0.18);
+  border-color:rgba(31,86,179,0.2);
+}
+.building-card::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%);
+  transform:translateX(-100%);
+  transition:transform 0.8s;
+}
+.building-card:hover::before{
+  transform:translateX(100%);
+}
+
+.building-img{
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  display:block;
+  transition:transform 0.6s ease;
+  filter:brightness(0.98);
+}
+.building-card:hover .building-img{
+  transform:scale(1.08);
+  filter:brightness(1.05);
+}
+
+.building-name{
+  padding:18px;
+  text-align:center;
+  color:#1f56b3;
+  font-size:17px;
+  font-weight:600;
+  letter-spacing:0.3px;
+  background:#fff;
+  border-top:1px solid rgba(240,245,255,0.9);
+  position:relative;
+  overflow:hidden;
+}
+.building-name::after{
+  content:'';
+  position:absolute;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:40px;
+  height:3px;
+  background:linear-gradient(to right, #1f56b3, #4a90e2);
+  border-radius:2px;
+  transition:width 0.3s ease;
+}
+.building-card:hover .building-name::after{
+  width:80px;
+}
+
+/* 回忆弹窗优化 */
+.modal{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.65);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+  animation:modalFadeIn 0.3s ease;
+}
+@keyframes modalFadeIn {
+  from {opacity:0;}
+  to {opacity:1;}
+}
+
+/* 【改动1】弹窗加大：width 680px，max-height 90vh */
+.modal-box{
+  width:680px;
+  max-width:90vw;
+  max-height:90vh;
+  background:#fff;
+  padding:30px;
+  border-radius:22px;
+  box-shadow:0 15px 45px rgba(0,0,0,0.2);
+  animation:modalSlideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position:relative;
+  overflow-y:auto;
+  border:1px solid rgba(255,255,255,0.8);
+}
+@keyframes modalSlideUp {
+  from {opacity:0;transform:translateY(40px);}
+  to {opacity:1;transform:translateY(0);}
+}
+
+.close-btn{
+  position:absolute;
+  top:15px;
+  right:15px;
+  color:#99a9d1;
+  cursor:pointer;
+  font-size:26px;
+  width:36px;
+  height:36px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  transition:all 0.2s;
+  z-index:10;
+  background:rgba(255,255,255,0.9);
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+.close-btn:hover{
+  color:#1f56b3;
+  background:#fff;
+  transform:rotate(90deg) scale(1.1);
+  box-shadow:0 4px 12px rgba(31,86,179,0.15);
+}
+
+.modal-title{
+  color:#1f56b3;
+  font-size:24px;
+  text-align:center;
+  padding-bottom:20px;
+  border-bottom:1px solid #f0f5ff;
+  margin-bottom:25px;
+  font-weight:700;
+  position:relative;
+}
+.modal-title::after{
+  content:'';
+  position:absolute;
+  bottom:-1px;
+  left:50%;
+  transform:translateX(-50%);
+  width:100px;
+  height:3px;
+  background:linear-gradient(to right, #1f56b3, #4a90e2, #1f56b3);
+  border-radius:2px;
+}
+
+.memory-input{
+  width:100%;
+  min-height:120px;
+  padding:18px;
+  border:1px solid #e8efff;
+  border-radius:14px;
+  margin:18px 0;
+  resize:vertical;
+  font-size:15px;
+  line-height:1.6;
+  transition:all 0.3s;
+  background:#f9fbff;
+  color:#333;
+}
+.memory-input:focus{
+  outline:none;
+  border-color:#1f56b3;
+  box-shadow:0 0 0 4px rgba(31,86,179,0.12);
+  background:#fff;
+}
+.memory-input::placeholder{
+  color:#8ba3cc;
+  font-style:italic;
+}
+
+/* 按钮组优化 */
+.btns-group{
+  display:flex;
+  gap:15px;
+  margin-top:28px;
+}
+.save-btn,.view-btn{
+  flex:1;
+  padding:16px;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  cursor:pointer;
+  transition:all 0.3s;
+  font-weight:600;
+  letter-spacing:0.5px;
+  position:relative;
+  overflow:hidden;
+}
+.save-btn::before,.view-btn::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+  transform:translateX(-100%);
+}
+.save-btn:hover::before,.view-btn:hover::before{
+  transform:translateX(100%);
+  transition:transform 0.8s;
+}
+
+.save-btn{
+  background:linear-gradient(135deg, #1f56b3, #3a7bd5);
+  color:#fff;
+  box-shadow:0 6px 20px rgba(31,86,179,0.25);
+}
+.save-btn:hover{
+  background:linear-gradient(135deg, #174a9e, #2e6bc8);
+  transform:translateY(-3px);
+  box-shadow:0 10px 25px rgba(31,86,179,0.35);
+}
+
+.view-btn{
+  background:#f0f7ff;
+  color:#1f56b3;
+  border:1px solid #d5e4ff;
+  box-shadow:0 4px 15px rgba(31,86,179,0.12);
+}
+.view-btn:hover{
+  background:#e1eeff;
+  transform:translateY(-3px);
+  box-shadow:0 8px 20px rgba(31,86,179,0.2);
+}
+
+/* 图片上传区域优化 */
+.upload-area{
+  margin:20px 0;
+  padding:25px;
+  border:2px dashed #d5e4ff;
+  border-radius:14px;
+  text-align:center;
+  background:#f9fbff;
+  cursor:pointer;
+  transition:all 0.3s;
+  position:relative;
+  overflow:hidden;
+}
+.upload-area:hover{
+  border-color:#1f56b3;
+  background:#f0f7ff;
+  transform:translateY(-3px);
+  box-shadow:0 6px 20px rgba(31,86,179,0.15);
+}
+
+.upload-icon{
+  font-size:36px;
+  color:#1f56b3;
+  margin-bottom:12px;
+  display:inline-block;
+  animation:float 3s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.upload-text{
+  font-size:16px;
+  color:#4a6fa5;
+  font-weight:500;
+  margin-bottom:6px;
+}
+.upload-hint{
+  font-size:13px;
+  color:#8ba3cc;
+}
+
+#imagePreview{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(100px, 1fr));
+  gap:15px;
+  margin-top:20px;
+}
+
+.preview-item{
+  position:relative;
+  width:100%;
+  height:100px;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 4px 12px rgba(0,0,0,0.12);
+  transition:all 0.3s;
+}
+.preview-item:hover{
+  transform:scale(1.05) rotate(2deg);
+  box-shadow:0 8px 20px rgba(0,0,0,0.2);
+}
+
+.preview-img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.remove-img{
+  position:absolute;
+  top:8px;
+  right:8px;
+  background:rgba(0,0,0,0.7);
+  color:white;
+  border:none;
+  border-radius:50%;
+  width:28px;
+  height:28px;
+  font-size:16px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all 0.2s;
+  opacity:0.8;
+}
+.remove-img:hover{
+  background:rgba(0,0,0,0.9);
+  opacity:1;
+  transform:scale(1.15);
+}
+
+/* 回忆列表显示优化 */
+.memory-container{
+  margin-top:25px;
+  max-height:380px;
+  overflow-y:auto;
+  padding:20px;
+  background:linear-gradient(to bottom, #f9fbff, #f5f9ff);
+  border-radius:16px;
+  border:1px solid #e8f0ff;
+  scrollbar-width:thin;
+  scrollbar-color:#1f56b3 #f0f5ff;
+}
+.memory-container::-webkit-scrollbar{
+  width:8px;
+}
+.memory-container::-webkit-scrollbar-track{
+  background:#f0f5ff;
+  border-radius:4px;
+}
+.memory-container::-webkit-scrollbar-thumb{
+  background:#1f56b3;
+  border-radius:4px;
+}
+
+.memory-item{
+  padding:22px;
+  border-bottom:1px solid #e8f0ff;
+  background:#fff;
+  border-radius:14px;
+  margin-bottom:18px;
+  box-shadow:0 4px 15px rgba(31,86,179,0.06);
+  transition:all 0.3s;
+  border-left:4px solid transparent;
+}
+.memory-item:hover{
+  transform:translateY(-4px);
+  box-shadow:0 8px 25px rgba(31,86,179,0.12);
+  border-left-color:#1f56b3;
+}
+
+.user-header{
+  display:flex;
+  align-items:center;
+  margin-bottom:18px;
+}
+
+.memory-avatar{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  overflow:hidden;
+  margin-right:18px;
+  background:linear-gradient(135deg, #e0e8ff, #c9d7ff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  color:#1f56b3;
+  font-weight:bold;
+  flex-shrink:0;
+  border:3px solid #fff;
+  box-shadow:0 4px 15px rgba(31,86,179,0.15);
+}
+
+.memory-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.memory-nickname {
+  font-size:16px;
+  color:#1f56b3;
+  font-weight:600;
+  margin-bottom:6px;
+}
+
+.memory-time {
+  font-size:14px;
+  color:#8ba3cc;
+  display:flex;
+  align-items:center;
+}
+.memory-time::before{content:'🕐';margin-right:6px;font-size:12px;}
+
+.memory-text {
+  font-size:15px;
+  color:#333;
+  line-height:1.7;
+  margin-bottom:18px;
+  padding:15px 0;
+  border-top:1px solid #f5f9ff;
+  border-bottom:1px solid #f5f9ff;
+}
+
+/* 回忆图片显示优化 */
+.memory-images {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(100px, 1fr));
+  gap:12px;
+  margin-top:18px;
+}
+
+.memory-image-item {
+  width:100%;
+  height:100px;
+  border-radius:12px;
+  overflow:hidden;
+  cursor:pointer;
+  position:relative;
+  transition:all 0.3s;
+  box-shadow:0 4px 12px rgba(0,0,0,0.12);
+}
+.memory-image-item:hover {
+  transform:scale(1.08) rotate(1deg);
+  box-shadow:0 8px 25px rgba(0,0,0,0.25);
+}
+
+.memory-image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-count {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 8px 0 0 0;
+}
+
+.no-memories {
+  color:#8ba3cc;
+  padding:45px 25px;
+  text-align:center;
+  font-size:16px;
+  background:#fff;
+  border-radius:14px;
+  box-shadow:0 4px 15px rgba(31,86,179,0.05);
+  border:2px dashed #e8f0ff;
+}
+.no-memories::before{
+  content:'✨';
+  display:block;
+  font-size:32px;
+  margin-bottom:15px;
+  animation:float 3s ease-in-out infinite;
+}
+
+/* 图片放大弹窗优化 */
+.img-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);display:none;justify-content:center;align-items:center;z-index:9999;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:fadeIn 0.3s ease;}
+@keyframes fadeIn {
+  from {opacity:0;}
+  to {opacity:1;}
+}
+
+.big-img{
+  max-width:85%;
+  max-height:85%;
+  border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.4);
+  animation:zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes zoomIn {
+  from {opacity:0;transform:scale(0.9);}
+  to {opacity:1;transform:scale(1);}
+}
+
+.close-img{position:absolute;top:30px;right:40px;color:#fff;font-size:40px;cursor:pointer;transition:all 0.3s;background:rgba(0,0,0,0.5);width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.close-img:hover{background:rgba(0,0,0,0.7);transform:rotate(90deg) scale(1.1);}
+
+/* 温柔提示弹窗优化 */
+.success-tips{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:#fff;padding:40px 50px;border-radius:20px;box-shadow:0 15px 50px rgba(0,0,0,0.25);
+  z-index:99999;text-align:center;display:none;min-width:380px;
+  animation:tipsAppear 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border:1px solid rgba(255,255,255,0.8);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.success-tips::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:6px;
+  background:linear-gradient(to right, #1f56b3, #4a90e2, #1f56b3);
+  border-radius:20px 20px 0 0;
+}
+@keyframes tipsAppear {
+  from {opacity:0;transform:translate(-50%,-60%) scale(0.9);}
+  to {opacity:1;transform:translate(-50%,-50%) scale(1);}
+}
+
+.tips-text{font-size:18px;color:#333;margin-bottom:30px;line-height:1.7;}
+.tips-text::before{content:'💌';display:block;font-size:48px;margin-bottom:20px;animation:float 2s ease-in-out infinite;}
+
+.tips-btn{padding:14px 40px;background:linear-gradient(135deg, #1f56b3, #3a7bd5);color:#fff;border:none;border-radius:12px;cursor:pointer;font-size:16px;font-weight:600;transition:all 0.3s;letter-spacing:1px;box-shadow:0 6px 25px rgba(31,86,179,0.3);position:relative;overflow:hidden;}
+.tips-btn:hover{background:linear-gradient(135deg, #174a9e, #2e6bc8);transform:translateY(-3px);box-shadow:0 10px 30px rgba(31,86,179,0.4);}
+
+/* 登录提醒弹窗优化 */
+.login-reminder {
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:#fff;padding:40px 50px;border-radius:20px;box-shadow:0 15px 50px rgba(0,0,0,0.25);
+  z-index:10000;text-align:center;display:none;min-width:380px;
+  animation:modalSlideUp 0.4s ease;border:1px solid rgba(255,255,255,0.8);backdrop-filter:blur(10px);
+}
+.login-reminder::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:6px;
+  background:linear-gradient(to right, #1f56b3, #4a90e2, #1f56b3);
+  border-radius:20px 20px 0 0;
+}
+
+.reminder-text {
+  font-size:18px;color:#333;margin-bottom:35px;line-height:1.7;
+}
+.reminder-text::before{content:'🔐';display:block;font-size:42px;margin-bottom:20px;animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.reminder-btn {
+  padding:13px 32px;background:linear-gradient(135deg, #1f56b3, #3a7bd5);
+  color:white;border:none;border-radius:12px;cursor:pointer;
+  font-size:15px;font-weight:600;margin:0 10px;transition:all 0.3s;box-shadow:0 4px 15px rgba(31,86,179,0.25);
+}
+.reminder-btn:hover {
+  background:linear-gradient(135deg, #174a9e, #2e6bc8);transform:translateY(-3px);box-shadow:0 8px 20px rgba(31,86,179,0.35);
+}
+.reminder-btn:last-child{background:#f0f7ff;color:#1f56b3;border:1px solid #d5e4ff;}
+.reminder-btn:last-child:hover{background:#e1eeff;}
+
+/* 响应式优化 */
+@media (max-width: 1024px){
+  .building-container{
+    grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));
+    gap:20px;
+  }
+}
+
+@media (max-width: 768px){
+  .header{
+    padding:25px 20px;
+  }
+  .page-title{
+    font-size:30px;
+    margin-left:50px;
+    margin-right:20px;
+  }
+  .subtitle{
+    font-size:15px;
+  }
+  .building-container{
+    grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+    gap:18px;
+  }
+  .building-name{
+    padding:15px;
+    font-size:16px;
+  }
+  .modal-box{
+    padding:25px 20px;
+  }
+  .success-tips,.login-reminder{
+    min-width:320px;
+    padding:30px 35px;
+  }
+  .reminder-btn{
+    padding:12px 25px;
+    margin:0 8px;
+  }
+}
+
+@media (max-width: 480px){
+  .page-title{
+    font-size:26px;
+    margin-left:0;
+    margin-right:0;
+  }
+  .back-btn{
+    position:relative;
+    left:0;
+    top:0;
+    transform:none;
+    margin-bottom:15px;
+    display:inline-flex;
+    width:auto;
+  }
+  .building-container{
+    grid-template-columns:1fr;
+    gap:16px;
+  }
+  .modal-box{
+    width:95vw;
+    padding:22px 18px;
+  }
+  .btns-group{
+    flex-direction:column;
+    gap:12px;
+  }
+  .memory-avatar{
+    width:44px;
+    height:44px;
+  }
+  .success-tips,.login-reminder{
+    min-width:280px;
+    padding:25px 30px;
+  }
+  .reminder-btn{
+    padding:11px 20px;
+    margin:0 6px;
+    font-size:14px;
+  }
+}
+
+/* 添加一些微妙的动画效果 */
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.building-card {
+  animation: cardAppear 0.6s ease-out forwards;
+  animation-delay: calc(var(--card-index, 0) * 0.1s);
+  opacity: 0;
+}
+
+/* 为卡片添加索引 */
+.building-card:nth-child(1) { --card-index: 1; }
+.building-card:nth-child(2) { --card-index: 2; }
+.building-card:nth-child(3) { --card-index: 3; }
+.building-card:nth-child(4) { --card-index: 4; }
+.building-card:nth-child(5) { --card-index: 5; }
+.building-card:nth-child(6) { --card-index: 6; }
+.building-card:nth-child(7) { --card-index: 7; }
+.building-card:nth-child(8) { --card-index: 8; }
+.building-card:nth-child(9) { --card-index: 9; }
+.building-card:nth-child(10) { --card-index: 10; }
+.building-card:nth-child(11) { --card-index: 11; }
+.building-card:nth-child(12) { --card-index: 12; }
+.building-card:nth-child(13) { --card-index: 13; }
+.building-card:nth-child(14) { --card-index: 14; }
+.building-card:nth-child(15) { --card-index: 15; }
+.building-card:nth-child(16) { --card-index: 16; }
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="header">
+  <a class="back-btn" href="/">← 返回首页</a>
+  <h1 class="page-title">校园建筑·共享回忆墙</h1>
+  <p class="subtitle">点击建筑留下你的校园记忆</p>
+</div>
+<div class="building-container">
+  <!-- 全部16个校园场景 -->
+  <div class="building-card" onclick="showModal('体育场')">
+    <img src="/static/体育场.jpg" class="building-img" alt="体育场" onerror="this.src='/static/default-building.jpg'">
+    <div class="building-name">体育场</div>
+  </div>
+  <div class="building-card" onclick="showModal('教学实验综合楼')">
+    <img src="/static/教学实验综合楼.jpg" class="building-img" alt="教学实验综合楼" onerror="this.src='/static/default-building.jpg'">
+    <div class="building-name">教学实验综合楼</div>
+  </div>
+  <div class="building-card" onclick="showModal('图书馆')">
+    <img src="/static/图书馆.jpg" class="building-img" alt="图书馆" onerror="this.src='/static/default-building.jpg'">
+    <div class="building-name">图书馆</div>
+  </div>
+  <div class="building-card" onclick="showModal('宿舍楼')">
+    <img src="/static/宿舍楼.jpg" class="building-img" alt="宿舍楼" onerror="this.src='/static/default-building.jpg'">
+    <div class="building-name">宿舍楼</div>
+  </div>
+  <div class="building-card" onclick="showModal('礼堂')">
+    <img src="/static/礼堂.jpg" class="building-img" alt="礼堂" onerror="this.src='/static/default-building.jpg'">
+    <div class="building-name">礼堂</div>
+  </div>
+  <div class="building-card" onclick="showModal('学生餐厅')">
+    <img src="/static/学生餐厅.jpg" class="building-img" alt="学生餐厅" onerror="this.src='/static/default-building.jpg'">
+    <div class="building-name">学生餐厅</div>
+  </div>
+  <div class="building-card" onclick="showModal('校园湖')">
+    <img src="/static/校园湖.jpg" class="building-img" alt="校园湖" onerror="this.src='/static/default-building.jpg'">
+    <div class="building-name">校园湖</div>
+  </div>
+  <div class="building-card" onclick="showModal('马克思主义学院')">
+    <img src="/static/马克思主义学院.jpg" class="building-img" alt="马克思主义学院" onerror="this.src='/static/default-building.jpg'">
+    <div class="building-name">马克思主义学院</div>
+  </div>
+  <div class="building-card" onclick="showModal('工程实验楼')">
+    <img src="/static/工程实验楼.jpg" class="building-img" alt="工程实验楼" onerror="this.src='/static/default-building.jpg'">
+    <div class="building-name">工程实验楼</div>
+  </div>
+  <div class="building-card" onclick="showModal('理学院')">
+    <img src="/static/理学院.jpg" class="building-img" alt="理学院" onerror="this.src='/static/default-building.jpg'">
+    <div class="building-name">理学院</div>
+  </div>
+  <div class="building-card" onclick="showModal('智能工程与自动化学院')">
+    <img src="/static/智能工程与自动化学院.jpg" class="building-img" alt="智能工程与自动化学院" onerror="this.src='/static/default-building.jpg'">
+    <div class="building-name">智能工程与自动化学院</div>
+  </div>
+  <div class="building-card" onclick="showModal('数字媒体与艺术设计学院')">
+    <img src="/static/数字媒体与艺术设计学院.jpg" class="building-img" alt="数字媒体与艺术设计学院" onerror="this.src='/static/default-building.jpg'">
+    <div class="building-name">数字媒体与艺术设计学院</div>
+  </div>
+  <div class="building-card" onclick="showModal('网络空间安全学院')">
+    <img src="/static/网络空间安全学院.jpg" class="building-img" alt="网络空间安全学院" onerror="this.src='/static/default-building.jpg'">
+    <div class="building-name">网络空间安全学院</div>
+  </div>
+  <div class="building-card" onclick="showModal('学生活动中心')">
+    <img src="/static/学生活动中心.jpg" class="building-img" alt="学生活动中心" onerror="this.src='/static/default-building.jpg'">
+    <div class="building-name">学生活动中心</div>
+  </div>
+  <div class="building-card" onclick="showModal('教职工食堂')">
+    <img src="/static/教职工食堂.jpg" class="building-img" alt="教职工食堂" onerror="this.src='/static/default-building.jpg'">
+    <div class="building-name">教职工食堂</div>
+  </div>
+  <div class="building-card" onclick="showModal('天猫超市')">
+    <img src="/static/天猫超市.jpg" class="building-img" alt="天猫超市" onerror="this.src='/static/default-building.jpg'">
+    <div class="building-name">天猫超市</div>
+  </div>
+</div>
+
+<!-- 回忆弹窗 -->
+<div class="modal" id="memModal" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <span class="close-btn" onclick="closeModal()">×</span>
+    <h3 class="modal-title" id="modalTitle">体育场·我的回忆</h3>
+    <textarea class="memory-input" id="memContent" placeholder="在这里写下你与这个校园建筑的回忆吧～ ✨"></textarea>
+
+    <!-- 图片上传区域 -->
+    <div class="upload-area" onclick="event.stopPropagation();document.getElementById('imageInput').click()">
+      <div class="upload-icon">📷</div>
+      <div class="upload-text">点击添加图片（最多3张）</div>
+      <div class="upload-hint">支持JPG、PNG格式，每张不超过2MB</div>
+    </div>
+    <input type="file" id="imageInput" accept="image/*" multiple style="display:none" onchange="handleImageSelect(event)">
+
+    <!-- 图片预览区域 -->
+    <div id="imagePreview"></div>
+
+    <div class="btns-group">
+      <button class="save-btn" onclick="submitMem()">提交共享回忆</button>
+      <button class="view-btn" onclick="viewMem()">查看所有回忆</button>
+    </div>
+    <div class="memory-container" id="memList"></div>
+  </div>
+</div>
+
+<!-- 图片放大弹窗 -->
+<div class="img-modal" id="imgBigModal" onclick="closeImageModal()">
+  <span class="close-img" onclick="closeImageModal()">×</span>
+  <img class="big-img" id="bigImgShow">
+</div>
+
+<!-- 温柔提示弹窗 -->
+<div class="success-tips" id="tipsBox" onclick="closeTips()">
+  <div class="tips-text">💌 记忆已封存<br>你的校园故事被时光胶囊珍藏 ✨</div>
+  <button class="tips-btn" onclick="closeTips()">好呀</button>
+</div>
+
+<!-- 登录提醒弹窗 -->
+<div class="login-reminder" id="loginReminder" onclick="closeLoginReminder()">
+  <div class="reminder-text">请先登录，再分享你的校园回忆～</div>
+  <button class="reminder-btn" onclick="goToLogin()">去登录</button>
+  <button class="reminder-btn" onclick="closeLoginReminder()">稍后再说</button>
+</div>
+
+<script>
+// API基础URL
+const API_BASE = '/api';
+let nowScene = '';
+let selectedImages = [];
+let currentUser = null;
+
+// 页面加载时检查登录状态
+window.onload = async function() {
+  await checkLoginStatus();
+}
+
+// 检查登录状态 - 修复版
+async function checkLoginStatus() {
+  try {
+    const response = await fetch(`${API_BASE}/check-login`);
+    const data = await response.json();
+
+    if (data.logged_in && data.user) {
+      currentUser = data.user;
+      console.log('当前登录用户:', currentUser);
+    } else {
+      currentUser = null;
+    }
+  } catch (error) {
+    console.error('检查登录状态失败:', error);
+    currentUser = null;
+  }
+}
+
+// 获取当前登录用户信息 - 修复版
+function getCurrentUserInfo() {
+  if (currentUser && currentUser.id) {
+    return {
+      id: currentUser.id.toString(),
+      nickname: currentUser.nickname || currentUser.username || '未登录用户',
+      avatar: currentUser.avatar || '',
+      name: currentUser.username || ''
+    };
+  }
+  return {
+    id: '',
+    nickname: '未登录用户',
+    avatar: '',
+    name: ''
+  };
+}
+
+// 检查是否已登录
+function checkLogin() {
+  return currentUser !== null && currentUser.id;
+}
+
+// ========== 新增：发送通知到主页邮箱 ==========
+function sendNotificationToHome(type, fromUser, toUser, scene, content) {
+  // 读取已有的通知
+  let notifications = JSON.parse(localStorage.getItem('mailNotifications')) || [];
+  notifications.push({
+    type: type, // 'like' 或 'reply'
+    fromUser: fromUser,
+    toUser: toUser,
+    scene: scene,
+    content: content,
+    time: new Date().toLocaleString()
+  });
+  localStorage.setItem('mailNotifications', JSON.stringify(notifications));
+}
+
+// ========== 显示弹窗相关函数 ==========
+function showModal(scene) {
+  nowScene = scene;
+  document.getElementById('modalTitle').innerText = scene + '·我的回忆';
+  document.getElementById('memModal').style.display = 'flex';
+  document.getElementById('memList').innerHTML = '';
+  document.getElementById('memContent').value = '';
+  clearImagePreview();
+}
+
+function closeModal() {
+  document.getElementById('memModal').style.display = 'none';
+  clearImagePreview();
+}
+
+function clearImagePreview() {
+  selectedImages = [];
+  document.getElementById('imagePreview').innerHTML = '';
+  document.getElementById('imageInput').value = '';
+}
+
+function handleImageSelect(event) {
+  const files = event.target.files;
+  const maxImages = 3;
+  const maxSize = 2 * 1024 * 1024;
+
+  if (selectedImages.length + files.length > maxImages) {
+    alert(`最多只能选择${maxImages}张图片哦～`);
+    event.target.value = '';
+    return;
+  }
+
+  for (let i = 0; i < files.length && selectedImages.length < maxImages; i++) {
+    const file = files[i];
+    if (file.size > maxSize) {
+      alert(`图片"${file.name}"超过2MB，请选择更小的图片～`);
+      continue;
+    }
+    if (!file.type.match('image.*')) {
+      alert(`文件"${file.name}"不是图片格式哦～`);
+      continue;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      selectedImages.push({
+        name: file.name,
+        data: e.target.result,
+        type: file.type,
+        file: file  // 保留文件对象用于FormData上传
+      });
+      updateImagePreview();
+    };
+    reader.readAsDataURL(file);
+  }
+  event.target.value = '';
+}
+
+function updateImagePreview() {
+  const previewDiv = document.getElementById('imagePreview');
+  previewDiv.innerHTML = '';
+
+  if (selectedImages.length === 0) return;
+
+  selectedImages.forEach((image, index) => {
+    const previewItem = document.createElement('div');
+    previewItem.className = 'preview-item';
+    previewItem.innerHTML = `
+      <img src="${image.data}" class="preview-img" alt="预览图片">
+      <button class="remove-img" onclick="removeImage(${index})">×</button>
+    `;
+    previewDiv.appendChild(previewItem);
+  });
+}
+
+function removeImage(index) {
+  selectedImages.splice(index, 1);
+  updateImagePreview();
+}
+
+function closeImageModal() {
+  document.getElementById('imgBigModal').style.display = 'none';
+}
+
+function viewLargeImage(imageSrc) {
+  document.getElementById('bigImgShow').src = imageSrc;
+  document.getElementById('imgBigModal').style.display = 'flex';
+}
+
+function closeTips() {
+  document.getElementById('tipsBox').style.display = 'none';
+}
+
+function goToLogin() {
+  window.location.href = '/';
+}
+
+function closeLoginReminder() {
+  document.getElementById('loginReminder').style.display = 'none';
+}
+
+// ========== 查看回忆 - 连接到后端API ==========
+async function viewMem() {
+  const list = document.getElementById('memList');
+  list.innerHTML = '<div class="no-memories">加载中...</div>';
+
+  try {
+    const response = await fetch(`${API_BASE}/campus/memories/${encodeURIComponent(nowScene)}`);
+    const data = await response.json();
+
+    if (!data.success) {
+      list.innerHTML = '<div class="no-memories">加载失败，请重试</div>';
+      return;
+    }
+
+    const memories = data.memories || [];
+
+    if (memories.length === 0) {
+      list.innerHTML = '<div class="no-memories">暂无回忆，快来分享第一个吧～ ✨</div>';
+      return;
+    }
+
+    console.log(`显示${nowScene}的${memories.length}条回忆`);
+
+    // 获取当前用户信息
+    const currentUserInfo = getCurrentUserInfo();
+    const currentUserId = currentUserInfo.id;
+
+    const memoriesHTML = memories.map((memory, idx) => {
+      const user = memory.user_info || {
+        nickname: memory.name || '未登录用户',
+        avatar: memory.avatar || ''
+      };
+
+      let avatarHTML = '';
+      if (user.avatar && user.avatar !== '') {
+        avatarHTML = `<img src="${user.avatar}" alt="${user.nickname}的头像" onerror="this.parentElement.innerHTML='<div style=\"display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:18px;\">${user.nickname.charAt(0) || '未'}</div>'">`;
+      } else {
+        const firstChar = user.nickname.charAt(0) || '未';
+        avatarHTML = `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:18px;">${firstChar}</div>`;
+      }
+
+      // 处理图片（假设后端返回的图片是base64字符串数组）
+      let imagesHTML = '';
+      if (memory.images && memory.images.length > 0) {
+        const imagesToShow = memory.images.slice(0, 4);
+        imagesHTML = `<div class="memory-images">
+          ${imagesToShow.map((imgSrc, imgIdx) => `
+            <div class="memory-image-item" onclick="viewLargeImage('${imgSrc}')">
+              <img src="${imgSrc}" alt="回忆图片">
+              ${imgIdx === 3 && memory.images.length > 4 ? `<div class="image-count">+${memory.images.length - 4}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>`;
+      }
+
+      // 检查当前用户是否是回忆的作者
+      const isAuthor = memory.user_id && currentUser && memory.user_id.toString() === currentUser.id.toString();
+
+      return `
+<div class="memory-item" data-id="${memory.id}">
+  <div class="user-header">
+    <div class="memory-avatar">${avatarHTML}</div>
+    <div class="user-info">
+      <div class="memory-nickname">${user.nickname}</div>
+      <div class="memory-time">${memory.time || memory.created_at}</div>
+    </div>
+
+    <!-- 删除按钮（只有作者自己能看到） -->
+    ${isAuthor ? `
+      <button onclick="deleteMemory(${memory.id})"
+        style="padding:4px 12px;border-radius:6px;border:none;background:#ff4757;color:#fff;cursor:pointer;font-size:13px;margin-left:auto;">
+        🗑️ 删除
+      </button>
+    ` : ''}
+  </div>
+  ${memory.content ? `<div class="memory-text">${memory.content}</div>` : ''}
+  ${imagesHTML}
+  <div style="margin-top:10px;display:flex;align-items:center;gap:10px;">
+    <button onclick="likeMemory(${memory.id}, '${user.nickname}', '${nowScene}')"
+      style="padding:6px 14px;border-radius:8px;border:none;background:#1f56b3;color:#fff;cursor:pointer;">
+      👍 点赞
+    </button>
+    <span id="likeCount-${memory.id}" style="font-size:14px;color:#888;"></span>
+  </div>
+  <!-- 评论区 -->
+  <div style="margin-top:8px;display:flex;gap:6px;">
+    <input type="text" placeholder="写条评论..." id="commentInput-${memory.id}"
+      style="padding:6px 10px;border-radius:8px;border:1px solid #ccc;flex:1;"
+      onkeypress="if(event.key==='Enter') commentMemory('${memory.id}', '${user.nickname}', '${nowScene}', this)">
+    <button onclick="commentMemoryWithButton('${memory.id}', '${user.nickname}', '${nowScene}')"
+      style="padding:6px 12px;border-radius:8px;border:none;background:#1f56b3;color:#fff;cursor:pointer;">
+      发送
+    </button>
+  </div>
+  <div id="comments-${memory.id}" style="margin-top:8px;font-size:14px;color:#555;"></div>
+</div>`;
+    }).join('');
+
+    list.innerHTML = memoriesHTML;
+    list.scrollTop = 0;
+
+    // 加载点赞数（暂时使用本地存储）
+    memories.forEach(memory => {
+      let likes = JSON.parse(localStorage.getItem('likes_' + memory.id)) || [];
+      document.getElementById('likeCount-' + memory.id).textContent = `${likes.length} 赞`;
+    });
+
+  } catch (error) {
+    console.error('加载回忆失败:', error);
+    list.innerHTML = '<div class="no-memories">加载回忆失败，请重试</div>';
+  }
+}
+
+// ========== 提交回忆 - 连接到后端API ==========
+async function submitMem() {
+  if (!checkLogin()) {
+    document.getElementById('loginReminder').style.display = 'block';
+    return;
+  }
+
+  const content = document.getElementById('memContent').value.trim();
+  if (!content && selectedImages.length === 0) {
+    alert('请输入文字回忆或添加图片～');
+    return;
+  }
+
+  try {
+    // 创建FormData对象
+    const formData = new FormData();
+    formData.append('building', nowScene);
+    formData.append('content', content);
+
+    // 添加图片文件
+    selectedImages.forEach((image, index) => {
+      if (image.file) {
+        formData.append('images', image.file);
+      }
+    });
+
+    // 显示加载状态
+    const saveBtn = document.querySelector('.save-btn');
+    const originalText = saveBtn.textContent;
+    saveBtn.textContent = '提交中...';
+    saveBtn.disabled = true;
+
+    const response = await fetch(`${API_BASE}/campus/memories`, {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+
+    // 恢复按钮状态
+    saveBtn.textContent = originalText;
+    saveBtn.disabled = false;
+
+    if (data.success) {
+      document.getElementById('memModal').style.display = 'none';
+      document.getElementById('tipsBox').style.display = 'block';
+      document.getElementById('memContent').value = '';
+      clearImagePreview();
+
+      // 显示成功消息
+      showAlert('提交成功！', 'success');
+    } else {
+      alert(data.message || '提交失败');
+    }
+  } catch (error) {
+    console.error('提交回忆失败:', error);
+    alert('提交失败，请检查网络连接');
+    const saveBtn = document.querySelector('.save-btn');
+    saveBtn.textContent = '提交共享回忆';
+    saveBtn.disabled = false;
+  }
+}
+
+// ========== 删除回忆功能 ==========
+async function deleteMemory(memoryId) {
+  if (!confirm('确定要删除这条回忆吗？删除后无法恢复。')) {
+    return;
+  }
+
+  if (!checkLogin()) {
+    alert('请先登录');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/campus/memories/${memoryId}`, {
+      method: 'DELETE'
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      showAlert('删除成功！', 'success');
+      // 重新加载记忆列表
+      viewMem();
+    } else {
+      showAlert(data.message || '删除失败', 'error');
+    }
+  } catch (error) {
+    console.error('删除失败:', error);
+    showAlert('删除失败，请检查网络连接', 'error');
+  }
+}
+
+// ========== 点赞功能 ==========
+function likeMemory(id, toUser, scene) {
+  if(!checkLogin()){
+    alert('请先登录才能点赞');
+    return;
+  }
+
+  let likes = JSON.parse(localStorage.getItem('likes_' + id)) || [];
+  const me = getCurrentUserInfo().nickname;
+
+  if(likes.includes(me)){
+    alert('你已经点过赞啦');
+    return;
+  }
+
+  likes.push(me);
+  localStorage.setItem('likes_' + id, JSON.stringify(likes));
+  document.getElementById('likeCount-' + id).textContent = `${likes.length} 赞`;
+
+  // 发送通知
+  sendNotificationToHome('like', me, toUser, scene, '点赞了你的回忆');
+}
+
+// ========== 评论功能 ==========
+function commentMemory(id, toUser, scene, inputEl) {
+  commentMemoryWithButton(id, toUser, scene);
+}
+
+function commentMemoryWithButton(id, toUser, scene) {
+  const input = document.getElementById(`commentInput-${id}`);
+  const txt = input.value.trim();
+
+  if (!checkLogin()) {
+    alert('请先登录');
+    return;
+  }
+
+  if (!txt) {
+    alert('评论不能为空');
+    return;
+  }
+
+  let comments = JSON.parse(localStorage.getItem('comments_' + id)) || [];
+  const me = getCurrentUserInfo().nickname;
+
+  comments.push({
+    user: me,
+    text: txt,
+    time: new Date().toLocaleString()
+  });
+
+  localStorage.setItem('comments_' + id, JSON.stringify(comments));
+  input.value = '';
+  renderComments(id, comments);
+
+  // 发送通知
+  sendNotificationToHome('reply', me, toUser, scene, txt);
+}
+
+function renderComments(id, comments) {
+  const div = document.getElementById('comments-' + id);
+  if(!comments.length){
+    div.innerHTML = '';
+    return;
+  }
+  div.innerHTML = `<strong>评论：</strong>` +
+    comments.map(c => `<div><b>${c.user}</b>: ${c.text} <small>(${c.time})</small></div>`).join('');
+}
+
+// ========== 显示消息 ==========
+function showAlert(message, type) {
+  const colors = {
+    success: 'linear-gradient(90deg, #4CAF50, #45a049)',
+    error: 'linear-gradient(90deg, #f44336, #d32f2f)'
+  };
+
+  const alertDiv = document.createElement('div');
+  alertDiv.textContent = message;
+  alertDiv.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: ${colors[type] || colors.success};
+    color: white;
+    padding: 12px 24px;
+    border-radius: 10px;
+    z-index: 1000;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    font-weight: 600;
+    animation: slideIn 0.3s ease;
+  `;
+  document.body.appendChild(alertDiv);
+
+  setTimeout(() => {
+    alertDiv.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => alertDiv.remove(), 300);
+  }, 2000);
+
+  // 添加动画样式
+  if (!document.getElementById('alertAnimations')) {
+    const style = document.createElement('style');
+    style.id = 'alertAnimations';
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}
+
+// ESC键关闭所有弹窗
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeModal();
+    closeImageModal();
+    closeTips();
+    closeLoginReminder();
+  }
+});
+</script>
+</body>
+</html>
